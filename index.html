@@ -6,6 +6,7 @@
 <title>CRM Recovery Unit — Editable Operations Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   /* ── Liquid Glass Black + Crimson Red ── */
@@ -548,12 +549,123 @@ canvas{max-width:100%;}
 .chart-wrap{position:relative;height:220px;}
 .chart-wrap-lg{position:relative;height:280px;}
 
+/* ── LIGHT THEME CONTRAST FIXES ── */
+body.light-theme .kpi-lbl { color: #444; }
+body.light-theme .kpi-hint { color: #555; }
+body.light-theme .card-sub { color: #555; }
+body.light-theme .sec-label { color: #444; }
+body.light-theme .ef { color: inherit; border-bottom-color: rgba(0,0,0,0.2); }
+body.light-theme .ce { color: inherit; }
+body.light-theme .ce:focus { background: rgba(200,0,26,0.05); }
+body.light-theme tbody td { color: #1a1a1a; }
+body.light-theme tbody td:first-child { color: #333; }
+body.light-theme thead th { color: #333; }
+body.light-theme tfoot td:first-child { color: #c8001a; }
+body.light-theme .m-pct { color: #444; }
+body.light-theme .m-rank { color: #444; }
+body.light-theme .agent-name { color: #222; }
+body.light-theme .mon-lbl { color: #555; }
+body.light-theme .mon-growth { color: #008844; }
+body.light-theme .chip-val { color: #111; }
+body.light-theme .live-pill { color: #c8001a; border-color: rgba(200,0,26,0.4); }
+body.light-theme .baro-sub { color: rgba(140,0,20,0.9); }
+body.light-theme #thermo-label { color: #444; }
+body.light-theme #thermo-sub { color: #444; }
+body.light-theme .ctrl-label { color: #444; }
+body.light-theme .tab-btn.active { color: #111; text-shadow: none; }
+body.light-theme .hdr-brand p { color: #555; }
+body.light-theme .baro-title { color: #111; }
+body.light-theme footer span { color: #444; }
+body.light-theme .kpi-val.red { text-shadow: none; }
+
+/* ── NEW MONTH button — dark theme (default) ── */
+#new-month-btn {
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  background: rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.85) !important;
+}
+#new-month-btn:hover {
+  border-color: rgba(232,0,28,0.6) !important;
+  background: rgba(232,0,28,0.12) !important;
+  color: #ff3350 !important;
+}
+
+/* ── NEW MONTH button — light theme ── */
+body.light-theme #new-month-btn {
+  border: 1px solid rgba(0,0,0,0.40) !important;
+  background: rgba(0,0,0,0.10) !important;
+  color: rgba(0,0,0,0.85) !important;
+}
+body.light-theme #new-month-btn:hover {
+  border-color: rgba(200,0,26,0.6) !important;
+  background: rgba(200,0,26,0.10) !important;
+  color: #c8001a !important;
+}
+
+/* ── SAVE & SHARE button — light theme ── */
+body.light-theme #hdr-right-save,
+body.light-theme button[onclick="savePage()"] {
+  border-color: rgba(200,0,26,0.5);
+  background: rgba(200,0,26,0.08);
+  color: #c8001a;
+}
+
+/* ── Tab 5 FTV amber — replace near-invisible yellow with deep orange in light theme ── */
+body.light-theme .ftv-title   { color: #c07000 !important; }
+body.light-theme .ftv-total   { color: #c07000 !important; }
+body.light-theme .ftv-bank    { color: #c07000 !important; }
+
+/* ── MOBILE-FIRST RESPONSIVE ── */
+@media(max-width:480px){
+  #app-header { padding: 0 12px; height: auto; min-height: 56px; flex-wrap: wrap; gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+  .hdr-brand h1 { font-size: 18px; letter-spacing: 3px; }
+  .hdr-brand p { font-size: 9px; }
+  .hdr-right { gap: 8px; flex-wrap: wrap; justify-content: flex-end; width: 100%; }
+  .hdr-date { font-size: 10px; }
+  .hdr-date input.ef { width: 100px; font-size: 10px; }
+  #theme-toggle { font-size: 10px; padding: 5px 10px; }
+  #tab-bar { padding: 0 8px; overflow-x: auto; gap: 0; -webkit-overflow-scrolling: touch; }
+  #tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { font-size: 11px; padding: 0 12px; height: 42px; letter-spacing: 1px; }
+  .tab-panel { padding: 12px; }
+  #save-banner { margin: 6px 12px; font-size: 10px; }
+  .kpi-grid,.g6 { grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .g2,.g3,.g4,.g32,.g23 { grid-template-columns: 1fr; gap: 12px; }
+  .kpi { padding: 12px 10px; border-radius: 10px; }
+  .kpi-val { font-size: 28px; }
+  .card { padding: 14px; border-radius: 12px; }
+  .card-title { font-size: 13px; }
+  .ctrl-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .ctrl-btn { width: 100%; text-align: center; padding: 10px 16px; font-size: 12px; }
+  table { font-size: 10px; }
+  thead th, tbody td, tfoot td { padding: 6px 5px; }
+  .insight-grid { grid-template-columns: 1fr; }
+  .baro-header { flex-direction: column; gap: 10px; padding: 16px; }
+  .baro-body { padding: 16px; }
+  .baro-title { font-size: 22px; letter-spacing: 2px; }
+  .g4 { grid-template-columns: repeat(2,1fr); }
+  .chart-wrap { height: 180px; }
+  .chart-wrap-lg { height: 220px; }
+  footer { flex-direction: column; gap: 4px; text-align: center; padding: 14px 12px; }
+  .mon-val { font-size: 26px; }
+  .agent-bar-wrap { width: 50px; }
+}
+
 @media(max-width:900px){
   .kpi-grid,.g6{grid-template-columns:repeat(3,1fr);}
   .g2,.g3,.g4,.g32,.g23{grid-template-columns:1fr;}
   .tab-panel{padding:16px;}
   #app-header,#tab-bar{padding:0 16px;}
   #save-banner{margin:8px 16px;}
+  #tab-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #tab-bar::-webkit-scrollbar { display: none; }
+}
+
+@media(hover:none) and (pointer:coarse){
+  .ctrl-btn { min-height: 44px; }
+  .tab-btn { min-height: 44px; }
+  .del-btn { min-width: 36px; min-height: 36px; }
+  input.ce, input.ef { font-size: 16px; }
 }
 </style>
 </head>
@@ -571,7 +683,8 @@ canvas{max-width:100%;}
     </div>
     <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">☀ LIGHT</button>
     <button onclick="savePage()" style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:2px;padding:6px 14px;border-radius:8px;border:1px solid rgba(232,0,28,0.5);background:rgba(232,0,28,0.12);color:#ff3350;cursor:pointer;text-transform:uppercase;white-space:nowrap;backdrop-filter:blur(8px);">↓ SAVE &amp; SHARE</button>
-    <button onclick="showMasterClearModal()" style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:2px;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.6);cursor:pointer;text-transform:uppercase;white-space:nowrap;backdrop-filter:blur(8px);">⊗ NEW MONTH</button>
+    <button id="new-month-btn" onclick="showMasterClearModal()" style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:2px;padding:6px 14px;border-radius:8px;cursor:pointer;text-transform:uppercase;white-space:nowrap;backdrop-filter:blur(8px);">⊗ NEW MONTH</button>
+    <button onclick="exportAllToXLSX()" id="xlsx-export-btn" style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:2px;padding:6px 14px;border-radius:8px;border:1px solid rgba(0,229,160,0.45);background:rgba(0,229,160,0.08);color:#00e5a0;cursor:pointer;text-transform:uppercase;white-space:nowrap;backdrop-filter:blur(8px);">⬇ EXPORT XLSX</button>
     <div style="display:flex;align-items:center;gap:7px;">
       <div id="autosave-dot" title="Auto-save status" style="width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.12);transition:background 0.4s,box-shadow 0.4s;flex-shrink:0;"></div>
       <button onclick="forceSave()" title="Force save to cloud now" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;padding:6px 14px;border-radius:8px;border:1px solid rgba(0,229,160,0.5);background:rgba(0,229,160,0.08);color:#00e5a0;cursor:pointer;text-transform:uppercase;white-space:nowrap;">☁ SAVE NOW</button>
@@ -1052,7 +1165,7 @@ canvas{max-width:100%;}
 
     <!-- FTV REPOS TABLE -->
     <div class="card">
-      <div class="card-title" style="color:#ffb340;">FTV Repos</div>
+      <div class="card-title ftv-title" style="color:#ffb340;">FTV Repos</div>
       <div class="card-sub">FTV AGENT · DATE · UNITS</div>
       <div class="tbl-wrap">
         <table>
@@ -1068,7 +1181,7 @@ canvas{max-width:100%;}
           </thead>
           <tbody id="ftv-tbody"></tbody>
           <tfoot>
-            <tr><td>TOTAL</td><td></td><td id="ftv-ft" style="color:#ffb340;">0</td><td></td><td></td><td></td></tr>
+            <tr><td>TOTAL</td><td></td><td id="ftv-ft" class="ftv-total" style="color:#ffb340;">0</td><td></td><td></td><td></td></tr>
           </tfoot>
         </table>
       </div>
@@ -2075,6 +2188,13 @@ function renderMandateBars() {
 // ══════════════════════════════════════════════════
 // CHARTS
 // ══════════════════════════════════════════════════
+
+// Theme-aware colour helpers — call at chart-build time, not at init
+function cText()     { return document.body.classList.contains('light-theme') ? 'rgba(30,30,30,0.75)'  : 'rgba(255,255,255,0.55)'; }
+function cTextStrong(){ return document.body.classList.contains('light-theme') ? 'rgba(20,20,20,0.90)'  : 'rgba(255,255,255,0.80)'; }
+function cGrid()     { return document.body.classList.contains('light-theme') ? 'rgba(0,0,0,0.08)'     : 'rgba(255,255,255,0.07)'; }
+function cBorder()   { return document.body.classList.contains('light-theme') ? '#d0d0d8'              : '#060606'; }
+
 function updatePortfolioChart(totals) {
   destroyChart('portfolio');
   const el = document.getElementById('portfolioChart');
@@ -2087,13 +2207,13 @@ function updatePortfolioChart(totals) {
       datasets: [{
         data: [t.wb, t.bmw, t.absa, t.std, t.imas, t.mq],
         backgroundColor: ['#0070d8','#48a8ff','#cc2233','#1a3c8f','#8855cc','#dd7700'],
-        borderWidth: 2, borderColor: '#060606', hoverOffset: 6
+        borderWidth: 2, borderColor: cBorder(), hoverOffset: 6
       }]
     },
     options: {
       cutout: '62%',
       plugins: {
-        legend: {position:'right', labels:{boxWidth:10, padding:8, color:'rgba(255,255,255,0.35)', font:{size:9}}},
+        legend: {position:'right', labels:{boxWidth:10, padding:8, color:cText(), font:{size:9}}},
         tooltip: {callbacks:{label: c => ` ${c.label}: ${c.raw} units`}}
       }
     }
@@ -2121,8 +2241,8 @@ function updateTrendChart() {
     options: {
       plugins: {legend:{display:false}},
       scales: {
-        y: {beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.35)', stepSize:1}},
-        x: {grid:{display:false}, ticks:{color:'rgba(255,255,255,0.75)'}}
+        y: {beginAtZero:true, grid:{color:cGrid()}, ticks:{color:cText(), stepSize:1}},
+        x: {grid:{display:false}, ticks:{color:cTextStrong()}}
       }
     }
   });
@@ -2144,10 +2264,10 @@ function updateScanTrendChart() {
       ]
     },
     options: {
-      plugins:{legend:{labels:{boxWidth:10,color:'rgba(255,255,255,0.35)'}}},
+      plugins:{legend:{labels:{boxWidth:10, color:cText()}}},
       scales: {
-        y:{grid:{color:'rgba(255,255,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.35)', callback:v=>v.toLocaleString()}},
-        x:{grid:{display:false}, ticks:{color:'rgba(255,255,255,0.75)', maxRotation:30}}
+        y:{grid:{color:cGrid()}, ticks:{color:cText(), callback:v=>v.toLocaleString()}},
+        x:{grid:{display:false}, ticks:{color:cTextStrong(), maxRotation:30}}
       }
     }
   });
@@ -2175,8 +2295,8 @@ function updateHitsPerDayChart() {
     options: {
       plugins:{legend:{display:false}},
       scales: {
-        y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.35)'}},
-        x:{grid:{display:false}, ticks:{color:'rgba(255,255,255,0.75)', maxRotation:30}}
+        y:{beginAtZero:true, grid:{color:cGrid()}, ticks:{color:cText()}},
+        x:{grid:{display:false}, ticks:{color:cTextStrong(), maxRotation:30}}
       }
     }
   });
@@ -2203,8 +2323,8 @@ function updateEdcChart() {
     options: {
       plugins:{legend:{display:false}},
       scales: {
-        y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.35)', stepSize:1}},
-        x:{grid:{display:false}, ticks:{color:'rgba(255,255,255,0.75)', maxRotation:35, font:{size:9}}}
+        y:{beginAtZero:true, grid:{color:cGrid()}, ticks:{color:cText(), stepSize:1}},
+        x:{grid:{display:false}, ticks:{color:cTextStrong(), maxRotation:35, font:{size:9}}}
       }
     }
   });
@@ -2227,12 +2347,12 @@ function updateMandateChart() {
     type: 'doughnut',
     data: {
       labels: banks.map(b=>b.name),
-      datasets: [{data, backgroundColor:banks.map(b=>b.color), borderWidth:2, borderColor:'#060606', hoverOffset:6}]
+      datasets: [{data, backgroundColor:banks.map(b=>b.color), borderWidth:2, borderColor:cBorder(), hoverOffset:6}]
     },
     options: {
       cutout:'55%',
       plugins:{
-        legend:{position:'right', labels:{boxWidth:10, padding:8, color:'rgba(255,255,255,0.35)', font:{size:9}}},
+        legend:{position:'right', labels:{boxWidth:10, padding:8, color:cText(), font:{size:9}}},
         tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}`}}
       }
     }
@@ -2274,18 +2394,22 @@ window.addEventListener('DOMContentLoaded', async () => {
 // (with the other data stores) so that loadPersistedData() can restore them
 // before the render functions run. Do NOT redeclare them here.
 
+function ftvColor() { return document.body.classList.contains('light-theme') ? '#c07000' : '#ffb340'; }
+
 // ── Generic table renderer (shared pattern for all 3 tables)
 function renderT5Table(data, tbodyId, delAttr, unitColor) {
   const tbody = document.getElementById(tbodyId);
   tbody.innerHTML = '';
+  const resolvedUnit = (unitColor === '#ffb340') ? ftvColor() : unitColor;
+  const bankColor = ftvColor();
   data.forEach((r, i) => {
     const tr = document.createElement('tr');
     tr.dataset.idx = i;
     tr.innerHTML = `
       <td><input class="ce" data-field="agent" value="${r.agent}" style="text-align:left;width:120px;"></td>
       <td><input class="ce" data-field="date"  value="${r.date}"  style="text-align:right;width:88px;"></td>
-      <td><input class="ce" data-field="units" type="number" value="${r.units}" style="color:${unitColor}"></td>
-      <td><input class="ce" data-field="bank"  value="${r.bank}"  style="text-align:right;width:76px;color:#ffb340"></td>
+      <td><input class="ce" data-field="units" type="number" value="${r.units}" style="color:${resolvedUnit}"></td>
+      <td><input class="ce" data-field="bank"  value="${r.bank}"  style="text-align:right;width:76px;color:${bankColor}"></td>
       <td><input class="ce" data-field="note"  value="${r.note}"  style="text-align:left;width:100px;color:#5a7099"></td>
       <td><button class="del-btn" data-del="${delAttr}:${i}">✕</button></td>
     `;
@@ -2378,6 +2502,13 @@ function toggleTheme() {
   const btn = document.getElementById('theme-toggle');
   btn.textContent = isLight ? '☽ DARK' : '☀ LIGHT';
   try { localStorage.setItem('crm-theme', isLight ? 'light' : 'dark'); } catch(e){}
+  // Re-render Tab 5 tables so FTV amber → deep orange updates immediately
+  renderExtEdcTable();
+  renderTracerTable();
+  renderFtvTable();
+  recalcTab5();
+  // Rebuild all charts so legend/axis colours update immediately
+  setTimeout(initAllCharts, 50);
 }
 (function applyStoredTheme() {
   try {
@@ -2387,6 +2518,300 @@ function toggleTheme() {
       if (btn) btn.textContent = '☽ DARK';
     }
   } catch(e){}
+})();
+
+// ══════════════════════════════════════════════════
+// XLSX EXPORT — All tabs as separate sheets
+// ══════════════════════════════════════════════════
+function exportAllToXLSX() {
+  if (typeof XLSX === 'undefined') {
+    alert('SheetJS library not loaded. Please check your internet connection and try again.');
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+  const headerDate = document.getElementById('hdr-date-val')?.value || '';
+
+  // ── Helper: style header rows (bold)
+  function addSheet(ws, name) {
+    XLSX.utils.book_append_sheet(wb, ws, name);
+  }
+
+  // ── SHEET 1: Repo Stats — Daily Breakdown
+  (function sheet1() {
+    const totals = calcDailyTotals();
+    const rows = [
+      ['CRM Recovery Unit — Repo Stats', '', '', '', '', '', '', '', '', ''],
+      [`Report Date: ${headerDate}`, '', '', '', '', '', '', '', '', ''],
+      [],
+      ['KPI Summary', ''],
+      ['Units MTD', totals.total],
+      ['Period Target', +document.getElementById('k-target')?.value || 200],
+      ['Outstanding', Math.max(0, (+document.getElementById('k-target')?.value || 200) - totals.total)],
+      ['Daily Average', (totals.total / (dailyData.length || 1)).toFixed(2)],
+      ['Peak Output', dailyData.reduce((p,r)=>{ const t=r.mq+r.bmw+r.wb+r.absa+r.std+r.imas; return t>p?t:p; }, 0)],
+      [],
+      ['Daily Recovery Breakdown', '', '', '', '', '', '', '', ''],
+      ['Date', 'Total', 'MQ', 'BMW', 'Wesbank', 'ABSA', 'STD Bank', 'IMAS', 'MTD Running'],
+    ];
+
+    let running = 0;
+    dailyData.forEach(r => {
+      const total = r.mq + r.bmw + r.wb + r.absa + r.std + r.imas;
+      running += total;
+      rows.push([r.date, total, r.mq, r.bmw, r.wb, r.absa, r.std, r.imas, running]);
+    });
+    rows.push(['TOTALS', totals.total, totals.mq, totals.bmw, totals.wb, totals.absa, totals.std, totals.imas, totals.total]);
+
+    rows.push([]);
+    rows.push(['Queue Assignments', '', '']);
+    rows.push(['Date', 'Qty Assigned', 'No. Queues']);
+    document.querySelectorAll('#assign-tbody tr').forEach(tr => {
+      const ins = tr.querySelectorAll('input');
+      if (ins.length >= 3) rows.push([ins[0].value, +ins[1].value||0, +ins[2].value||0]);
+    });
+
+    rows.push([]);
+    rows.push(['Month-on-Month', '']);
+    rows.push(['Prior Month Units', +document.getElementById('may-val')?.value || 0]);
+    rows.push(['Current Month Units', totals.total]);
+    const may = +document.getElementById('may-val')?.value || 1;
+    const pct = may > 0 ? (((totals.total - may) / may) * 100).toFixed(1) : 0;
+    rows.push(['Growth %', pct + '%']);
+
+    addSheet(XLSX.utils.aoa_to_sheet(rows), 'Repo Stats');
+  })();
+
+  // ── SHEET 2: ANPR Scans
+  (function sheet2() {
+    const rows = [
+      ['CRM Recovery Unit — ANPR Scans', '', '', ''],
+      [`Report Date: ${headerDate}`, '', '', ''],
+      [],
+      ['KPI Summary', ''],
+      ['Total Scans MTD', anprData.reduce((s,r)=>s+r.days.reduce((a,d)=>a+d.scans,0),0)],
+      ['Total Positive Hits', anprData.reduce((s,r)=>s+r.days.reduce((a,d)=>a+d.hits,0),0)],
+      ['Daily Target', +document.getElementById('anpr-target')?.value || 50000],
+      ['Number of Days', anprDays.length],
+      [],
+    ];
+
+    // Header row: Agent | Day1 Scans | Day1 Hits | Day2 Scans | ...
+    const hdr = ['Agent'];
+    anprDays.forEach(d => { hdr.push(d + ' Scans'); hdr.push(d + ' Hits'); });
+    hdr.push('Total Scans', 'Total Hits', 'Notes');
+    rows.push(hdr);
+
+    anprData.forEach(r => {
+      const row = [r.name];
+      r.days.forEach(d => { row.push(d.scans); row.push(d.hits); });
+      row.push(r.days.reduce((s,d)=>s+d.scans,0));
+      row.push(r.days.reduce((s,d)=>s+d.hits,0));
+      row.push(r.note || '');
+      rows.push(row);
+    });
+
+    // Footer totals
+    const ftRow = ['TOTALS'];
+    anprDays.forEach((d,di) => {
+      ftRow.push(anprData.reduce((s,r)=>s+(r.days[di]?.scans||0),0));
+      ftRow.push(anprData.reduce((s,r)=>s+(r.days[di]?.hits||0),0));
+    });
+    ftRow.push(anprData.reduce((s,r)=>s+r.days.reduce((a,d)=>a+d.scans,0),0));
+    ftRow.push(anprData.reduce((s,r)=>s+r.days.reduce((a,d)=>a+d.hits,0),0));
+    ftRow.push('');
+    rows.push(ftRow);
+
+    rows.push([]);
+    rows.push(['Agent Hit Ranking', '']);
+    rows.push(['Rank', 'Agent', 'Total Hits']);
+    const ranked = anprData
+      .map(r => ({name: r.name, hits: r.days.reduce((s,d)=>s+d.hits,0)}))
+      .sort((a,b) => b.hits - a.hits);
+    ranked.forEach((a, i) => rows.push([i+1, a.name, a.hits]));
+
+    addSheet(XLSX.utils.aoa_to_sheet(rows), 'ANPR Scans');
+  })();
+
+  // ── SHEET 3: ANPR EDC Stats
+  (function sheet3() {
+    const total = edcData.reduce((s,r) => s+r.val, 0);
+    const rows = [
+      ['CRM Recovery Unit — ANPR EDC Stats', ''],
+      [`Report Date: ${headerDate}`, ''],
+      [],
+      ['EDC Upliftments Per Agent', '', ''],
+      ['Rank', 'Agent Name', 'MTD Upliftments', 'Share %'],
+    ];
+    const sorted = [...edcData].sort((a,b) => b.val - a.val);
+    sorted.forEach((r,i) => {
+      const pct = total > 0 ? (r.val/total*100).toFixed(1) + '%' : '0.0%';
+      rows.push([i+1, r.name, r.val, pct]);
+    });
+    rows.push(['', 'TOTAL', total, '100%']);
+    rows.push([]);
+    rows.push(['Insights', '']);
+    const tops = sorted.filter(r=>r.val===sorted[0]?.val).map(r=>r.name).join(' & ');
+    const zeros = edcData.filter(r=>r.val===0).map(r=>r.name).join(', ');
+    rows.push(['Top Performers', tops + (sorted[0]?.val ? ` — ${sorted[0].val} upliftments each` : '')]);
+    rows.push(['Zero Upliftments', zeros || 'None']);
+    rows.push(['Active Agents', edcData.filter(r=>r.val>0).length]);
+    addSheet(XLSX.utils.aoa_to_sheet(rows), 'ANPR EDC Stats');
+  })();
+
+  // ── SHEET 4: Repo Race (Barometer)
+  (function sheet4() {
+    const target = +document.getElementById('b-target')?.value || 200;
+    const day    = +document.getElementById('b-day')?.value    || 3;
+    const len    = +document.getElementById('b-length')?.value || 21;
+    const rec    = +document.getElementById('b-recovered')?.value || 0;
+    const ach    = (rec/target*100).toFixed(1);
+    const out    = target - rec;
+    const dLeft  = len - day;
+    const rr     = dLeft > 0 ? (out/dLeft).toFixed(1) : '0.0';
+    const expected = Math.round(target*(day/len));
+    const variance = rec - expected;
+
+    const banks = [
+      {id:'bk-wb',   name:'Wesbank'},
+      {id:'bk-std',  name:'STD Bank'},
+      {id:'bk-bmw',  name:'BMW FS'},
+      {id:'bk-absa', name:'ABSA'},
+      {id:'bk-mq',   name:'Marquis'},
+      {id:'bk-imas', name:'IMAS'},
+    ];
+
+    const rows = [
+      ['CRM Recovery Unit — Recovery Barometer', ''],
+      [`Report Date: ${headerDate}`, ''],
+      [],
+      ['Period Performance', ''],
+      ['Period Target', target],
+      ['Day of Period', day],
+      ['Period Length', len],
+      ['Total Recovered', rec],
+      ['Achievement %', ach + '%'],
+      ['Outstanding', out],
+      ['Run Rate Required (p.d.)', rr],
+      ['Variance to Pace', (variance>=0?'+':'')+variance],
+      [],
+      ['Bank Mandate Breakdown', ''],
+      ['Rank', 'Bank / Mandate', 'Units', 'Share %'],
+    ];
+
+    const bankVals = banks.map(b => ({name:b.name, val:+(document.getElementById(b.id)?.value||0)}));
+    const bTotal = bankVals.reduce((s,b)=>s+b.val,0) || 1;
+    bankVals.sort((a,b)=>b.val-a.val).forEach((b,i) => {
+      rows.push([i+1, b.name, b.val, (b.val/bTotal*100).toFixed(1)+'%']);
+    });
+    rows.push(['', 'TOTAL', bTotal, '100%']);
+
+    addSheet(XLSX.utils.aoa_to_sheet(rows), 'Repo Race');
+  })();
+
+  // ── SHEET 5: Ext EDC, Tracer & FTV
+  (function sheet5() {
+    const edcT    = extEdcData.reduce((s,r)=>s+r.units,0);
+    const tracerT = tracerData.reduce((s,r)=>s+r.units,0);
+    const ftvT    = ftvData.reduce((s,r)=>s+r.units,0);
+    const combined = edcT + tracerT + ftvT;
+
+    const rows = [
+      ['CRM Recovery Unit — Ext EDC, Tracer & FTV Repos', ''],
+      [`Report Date: ${headerDate}`, ''],
+      [],
+      ['MTD Summary', ''],
+      ['Ext EDC Upliftments', edcT],
+      ['Tracer Repos', tracerT],
+      ['FTV Repos', ftvT],
+      ['Combined Total', combined],
+      [],
+      ['External EDC Upliftments', '', '', '', ''],
+      ['Agent / Company', 'Date', 'Units', 'Bank', 'Notes'],
+    ];
+    extEdcData.forEach(r => rows.push([r.agent, r.date, r.units, r.bank, r.note]));
+    rows.push(['TOTAL', '', edcT, '', '']);
+
+    rows.push([]);
+    rows.push(['Tracer Repos', '', '', '', '']);
+    rows.push(['Tracer Agent', 'Date', 'Units', 'Bank', 'Notes']);
+    tracerData.forEach(r => rows.push([r.agent, r.date, r.units, r.bank, r.note]));
+    rows.push(['TOTAL', '', tracerT, '', '']);
+
+    rows.push([]);
+    rows.push(['FTV Repos', '', '', '', '']);
+    rows.push(['FTV Agent', 'Date', 'Units', 'Bank', 'Notes']);
+    ftvData.forEach(r => rows.push([r.agent, r.date, r.units, r.bank, r.note]));
+    rows.push(['TOTAL', '', ftvT, '', '']);
+
+    addSheet(XLSX.utils.aoa_to_sheet(rows), 'Ext EDC & Tracer');
+  })();
+
+  // ── SHEET 6: Full Summary
+  (function sheetSummary() {
+    const totals = calcDailyTotals();
+    const anprScans = anprData.reduce((s,r)=>s+r.days.reduce((a,d)=>a+d.scans,0),0);
+    const anprHits  = anprData.reduce((s,r)=>s+r.days.reduce((a,d)=>a+d.hits,0),0);
+    const edcTotal  = edcData.reduce((s,r)=>s+r.val,0);
+    const extEdc    = extEdcData.reduce((s,r)=>s+r.units,0);
+    const tracer    = tracerData.reduce((s,r)=>s+r.units,0);
+    const ftv       = ftvData.reduce((s,r)=>s+r.units,0);
+
+    const rows = [
+      ['CRM Recovery Unit — FULL DASHBOARD SUMMARY'],
+      [`Generated: ${new Date().toLocaleString()} | Report Date: ${headerDate}`],
+      [],
+      ['METRIC', 'VALUE', 'SOURCE'],
+      ['Units Recovered MTD', totals.total, 'Tab 1 – Repo Stats'],
+      ['Period Target', +document.getElementById('k-target')?.value || 200, 'Tab 1'],
+      ['Achievement %', ((totals.total / (+document.getElementById('k-target')?.value || 200)) * 100).toFixed(1) + '%', 'Calc'],
+      ['ANPR Scans MTD', anprScans, 'Tab 2 – ANPR Scans'],
+      ['ANPR Positive Hits', anprHits, 'Tab 2'],
+      ['ANPR Scan-to-Hit Ratio', anprScans > 0 ? (anprScans/anprHits).toFixed(0) + ':1' : 'N/A', 'Calc'],
+      ['EDC Upliftments MTD', edcTotal, 'Tab 3 – ANPR EDC'],
+      ['Ext EDC Upliftments MTD', extEdc, 'Tab 5'],
+      ['Tracer Repos MTD', tracer, 'Tab 5'],
+      ['FTV Repos MTD', ftv, 'Tab 5'],
+      ['Combined Ext + Tracer + FTV', extEdc+tracer+ftv, 'Calc'],
+      [],
+      ['MANDATE BREAKDOWN', ''],
+      ['Wesbank', totals.wb],
+      ['BMW FS', totals.bmw],
+      ['ABSA', totals.absa],
+      ['STD Bank', totals.std],
+      ['IMAS', totals.imas],
+      ['MQ / Marquis', totals.mq],
+    ];
+    addSheet(XLSX.utils.aoa_to_sheet(rows), 'Summary');
+  })();
+
+  // ── Download
+  const filename = `CRM_Recovery_Dashboard_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, filename);
+
+  // Flash confirmation
+  const b = document.getElementById('save-banner');
+  const btn = document.getElementById('xlsx-export-btn');
+  if (btn) { btn.textContent = '✓ EXPORTED!'; setTimeout(() => btn.textContent = '⬇ EXPORT XLSX', 2000); }
+  b.textContent = `✓  Excel file exported: ${filename} — 6 sheets: Summary, Repo Stats, ANPR, EDC, Barometer, Ext EDC`;
+  b.classList.add('show');
+  setTimeout(() => { b.classList.remove('show'); b.textContent = '✓  File saved — share or open this HTML on any device to see your data.'; }, 5000);
+}
+
+// ── Light theme: fix xlsx-export-btn colours
+(function patchXlsxBtnTheme() {
+  const applyBtn = () => {
+    const btn = document.getElementById('xlsx-export-btn');
+    if (!btn) return;
+    const isLight = document.body.classList.contains('light-theme');
+    btn.style.borderColor  = isLight ? 'rgba(0,140,80,0.55)' : 'rgba(0,229,160,0.45)';
+    btn.style.background   = isLight ? 'rgba(0,140,80,0.08)'  : 'rgba(0,229,160,0.08)';
+    btn.style.color        = isLight ? '#006633' : '#00e5a0';
+  };
+  document.addEventListener('DOMContentLoaded', applyBtn);
+  // Patch toggleTheme to also update button
+  const _orig = window.toggleTheme;
+  window.toggleTheme = function() { _orig && _orig(); applyBtn(); };
 })();
 
 function updateT5Charts() {
@@ -2445,12 +2870,12 @@ function updateT5Charts() {
       options:{
         indexAxis:'y',
         plugins:{
-          legend:{labels:{boxWidth:10,color:'rgba(255,255,255,0.35)',font:{size:9}}},
+          legend:{labels:{boxWidth:10,color:cText(),font:{size:9}}},
           tooltip:{mode:'index'}
         },
         scales:{
-          x:{beginAtZero:true,grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'rgba(255,255,255,0.35)',stepSize:1},stacked:true},
-          y:{grid:{display:false},ticks:{color:'rgba(255,255,255,0.75)',font:{size:10}},stacked:true}
+          x:{beginAtZero:true,grid:{color:cGrid()},ticks:{color:cText(),stepSize:1},stacked:true},
+          y:{grid:{display:false},ticks:{color:cTextStrong(),font:{size:10}},stacked:true}
         }
       }
     });
@@ -2481,10 +2906,10 @@ function updateT5Charts() {
         ]
       },
       options:{
-        plugins:{legend:{labels:{boxWidth:10,color:'rgba(255,255,255,0.35)',font:{size:9}}},tooltip:{mode:'index'}},
+        plugins:{legend:{labels:{boxWidth:10,color:cText(),font:{size:9}}},tooltip:{mode:'index'}},
         scales:{
-          y:{beginAtZero:true,grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'rgba(255,255,255,0.35)',stepSize:1},stacked:true},
-          x:{grid:{display:false},ticks:{color:'rgba(255,255,255,0.75)'},stacked:true}
+          y:{beginAtZero:true,grid:{color:cGrid()},ticks:{color:cText(),stepSize:1},stacked:true},
+          x:{grid:{display:false},ticks:{color:cTextStrong()},stacked:true}
         }
       }
     });
@@ -2508,7 +2933,7 @@ function updateT5Charts() {
       options:{
         cutout:'60%',
         plugins:{
-          legend:{position:'bottom',labels:{boxWidth:12,padding:10,color:'rgba(255,255,255,0.35)',font:{size:10}}},
+          legend:{position:'bottom',labels:{boxWidth:12,padding:10,color:cText(),font:{size:10}}},
           tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw} units`}}
         }
       }
