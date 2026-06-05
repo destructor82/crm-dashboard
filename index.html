@@ -1551,6 +1551,7 @@ document.getElementById('daily-tbody').addEventListener('click', function(e) {
   dailyData.splice(idx, 1);
   renderDailyTable();
   recalcAll();
+  autoSave();
 });
 
 function addDailyRow() {
@@ -1814,6 +1815,7 @@ document.getElementById('anpr-tbody').addEventListener('click', function(e) {
   if (!btn) return;
   anprData.splice(+btn.dataset.delAnpr, 1);
   renderAnprTable();
+  autoSave();
 });
 
 // ── Add a new blank agent row (with slots for all current days)
@@ -1946,6 +1948,7 @@ document.getElementById('edc-tbody').addEventListener('click', function(e) {
   edcData.splice(+btn.dataset.delEdc, 1);
   renderEdcTable();
   recalcTab3();
+  autoSave();
 });
 
 function addEdcRow() {
@@ -2324,16 +2327,16 @@ function makeT5ClickHandler(dataArr, renderFn) {
     if (!btn) return;
     const [, idxStr] = btn.dataset.del.split(':');
     dataArr.splice(+idxStr, 1);
-    renderFn(); recalcTab5();
+    renderFn(); recalcTab5(); autoSave();
   };
 }
 
 // Use live getters so handlers always reference the current arrays (even after loadPersistedData replaces them)
-document.getElementById('ext-edc-tbody').addEventListener('input',  e => makeT5InputHandler(extEdcData)(e));
+document.getElementById('ext-edc-tbody').addEventListener('input',  e => { makeT5InputHandler(extEdcData)(e); autoSave(); });
 document.getElementById('ext-edc-tbody').addEventListener('click',  e => makeT5ClickHandler(extEdcData, renderExtEdcTable)(e));
-document.getElementById('tracer-tbody').addEventListener('input',   e => makeT5InputHandler(tracerData)(e));
+document.getElementById('tracer-tbody').addEventListener('input',   e => { makeT5InputHandler(tracerData)(e); autoSave(); });
 document.getElementById('tracer-tbody').addEventListener('click',   e => makeT5ClickHandler(tracerData, renderTracerTable)(e));
-document.getElementById('ftv-tbody').addEventListener('input',      e => makeT5InputHandler(ftvData)(e));
+document.getElementById('ftv-tbody').addEventListener('input',      e => { makeT5InputHandler(ftvData)(e); autoSave(); });
 document.getElementById('ftv-tbody').addEventListener('click',      e => makeT5ClickHandler(ftvData, renderFtvTable)(e));
 
 function addT5Row(dataArr, renderFn, defaultName) {
