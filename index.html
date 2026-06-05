@@ -615,7 +615,20 @@ body.light-theme .ftv-title   { color: #c07000 !important; }
 body.light-theme .ftv-total   { color: #c07000 !important; }
 body.light-theme .ftv-bank    { color: #c07000 !important; }
 
-/* ── MOBILE-FIRST RESPONSIVE ── */
+/* ── ANPR sticky columns ── */
+#anpr-table td[style*="sticky"][style*="left:0"],
+#anpr-table th[style*="sticky"][style*="left:0"] {
+  box-shadow: 3px 0 8px rgba(0,0,0,0.35);
+}
+body.light-theme #anpr-table td[style*="sticky"][style*="left:0"],
+body.light-theme #anpr-table th[style*="sticky"][style*="left:0"] {
+  box-shadow: 3px 0 8px rgba(0,0,0,0.12);
+  background: #ededf0 !important;
+}
+body.light-theme #anpr-table td[style*="sticky"][style*="right"],
+body.light-theme #anpr-table th[style*="sticky"][style*="right"] {
+  background: #ededf0 !important;
+}
 @media(max-width:480px){
   #app-header { padding: 0 12px; height: auto; min-height: 56px; flex-wrap: wrap; gap: 8px; padding-top: 8px; padding-bottom: 8px; }
   .hdr-brand h1 { font-size: 18px; letter-spacing: 3px; }
@@ -1847,16 +1860,27 @@ function renderAnprTable() {
   const thead = document.getElementById('anpr-thead');
   const tbody = document.getElementById('anpr-tbody');
   const tfoot = document.getElementById('anpr-tfoot');
-  const numDays = anprDays.length;
 
   // ── HEADER ──
-  let hRow = '<tr><th style="text-align:left;min-width:120px;">Agent</th>';
+  const stickyAgentTh = 'position:sticky;left:0;z-index:4;background:var(--bg2);border-right:1px solid var(--border-red);text-align:left;min-width:130px;';
+  let hRow = `<tr><th style="${stickyAgentTh}">Agent</th>`;
   anprDays.forEach((d, di) => {
-    hRow += `<th title="Scans on ${d}" style="white-space:nowrap;">${d}</th>`;
+    hRow += `<th style="white-space:nowrap;padding:4px 6px;vertical-align:bottom;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+        <input class="ce" value="${d}"
+          style="text-align:center;width:86px;font-size:9px;letter-spacing:1px;color:var(--text);font-family:'Share Tech Mono',monospace;"
+          oninput="anprDays[${di}]=this.value;autoSave();">
+        <button onclick="deleteAnprDay(${di})" title="Remove this day column"
+          style="font-size:8px;padding:1px 7px;border-radius:4px;border:1px solid rgba(232,0,28,0.4);background:rgba(232,0,28,0.08);color:var(--accent2);cursor:pointer;font-family:'Rajdhani',sans-serif;letter-spacing:1px;line-height:1.4;">✕ DEL</button>
+      </div>
+    </th>`;
     hRow += `<th style="color:var(--accent2);white-space:nowrap;">+Hits</th>`;
   });
-  hRow += '<th>Total Scans</th><th style="color:var(--accent2)">Total Hits</th>';
-  hRow += '<th style="min-width:80px;">Notes</th>';
+  const stickyTotSc = 'position:sticky;right:88px;z-index:3;background:var(--bg2);border-left:1px solid var(--border);white-space:nowrap;';
+  const stickyTotHt = 'position:sticky;right:0;z-index:3;background:var(--bg2);border-left:1px solid var(--border);color:var(--accent2);white-space:nowrap;';
+  hRow += `<th style="${stickyTotSc}">Total Scans</th>`;
+  hRow += `<th style="${stickyTotHt}">Total Hits</th>`;
+  hRow += '<th style="min-width:90px;">Notes</th>';
   hRow += `<th><button class="ctrl-btn" onclick="addAnprDay()" style="font-size:9px;padding:3px 8px;white-space:nowrap;">+Day</button></th></tr>`;
   thead.innerHTML = hRow;
 
@@ -1868,13 +1892,15 @@ function renderAnprTable() {
     const tr = document.createElement('tr');
     tr.dataset.idx = i;
 
-    let cells = `<td><input class="ce" data-field="name" value="${r.name}" style="text-align:left;width:110px;"></td>`;
+    let cells = `<td style="position:sticky;left:0;z-index:2;background:var(--bg2);border-right:1px solid var(--border-red);">
+      <input class="ce" data-field="name" value="${r.name}" style="text-align:left;width:112px;font-weight:600;">
+    </td>`;
     r.days.forEach((d, di) => {
       cells += `<td><input class="ce" data-dtype="scans" data-day="${di}" type="number" value="${d.scans}"></td>`;
-      cells += `<td><input class="ce" data-dtype="hits"  data-day="${di}" type="number" value="${d.hits}"  style="color:var(--accent2)"></td>`;
+      cells += `<td><input class="ce" data-dtype="hits"  data-day="${di}" type="number" value="${d.hits}" style="color:var(--accent2)"></td>`;
     });
-    cells += `<td class="anpr-row-scan-total" style="color:var(--text);font-weight:600;">${totalScans.toLocaleString()}</td>`;
-    cells += `<td class="anpr-row-hit-total"  style="color:var(--accent2);font-weight:600;">${totalHits}</td>`;
+    cells += `<td class="anpr-row-scan-total" style="position:sticky;right:88px;z-index:2;background:var(--bg2);border-left:1px solid var(--border);color:var(--text);font-weight:700;">${totalScans.toLocaleString()}</td>`;
+    cells += `<td class="anpr-row-hit-total"  style="position:sticky;right:0;z-index:2;background:var(--bg2);border-left:1px solid var(--border);color:var(--accent2);font-weight:700;">${totalHits}</td>`;
     cells += `<td><input class="ce" data-field="note" value="${r.note}" style="text-align:left;width:120px;color:${r.note?'var(--accent4)':'var(--muted)'};"></td>`;
     cells += `<td><button class="del-btn" data-del-anpr="${i}">✕</button></td>`;
     tr.innerHTML = cells;
@@ -1882,17 +1908,17 @@ function renderAnprTable() {
   });
 
   // ── FOOTER ──
-  let fRow = '<tr><td>TOTALS</td>';
+  let fRow = `<tr><td style="position:sticky;left:0;background:var(--bg2);">TOTALS</td>`;
   anprDays.forEach((d, di) => {
-    const scanSum = anprData.reduce((s,r)=>s+r.days[di].scans,0);
-    const hitSum  = anprData.reduce((s,r)=>s+r.days[di].hits, 0);
+    const scanSum = anprData.reduce((s,r)=>s+(r.days[di]?.scans||0),0);
+    const hitSum  = anprData.reduce((s,r)=>s+(r.days[di]?.hits ||0),0);
     fRow += `<td id="af-s${di}" style="color:var(--accent)">${scanSum.toLocaleString()}</td>`;
     fRow += `<td id="af-h${di}" style="color:var(--accent2)">${hitSum}</td>`;
   });
   const grandScans = anprData.reduce((s,r)=>s+r.days.reduce((a,d)=>a+d.scans,0),0);
   const grandHits  = anprData.reduce((s,r)=>s+r.days.reduce((a,d)=>a+d.hits, 0),0);
-  fRow += `<td id="af-tot-scans" style="color:var(--accent)">${grandScans.toLocaleString()}</td>`;
-  fRow += `<td id="af-tot-hits"  style="color:var(--accent2)">${grandHits}</td>`;
+  fRow += `<td id="af-tot-scans" style="position:sticky;right:88px;background:var(--bg2);border-left:1px solid var(--border);color:var(--accent);">${grandScans.toLocaleString()}</td>`;
+  fRow += `<td id="af-tot-hits"  style="position:sticky;right:0;background:var(--bg2);border-left:1px solid var(--border);color:var(--accent2);">${grandHits}</td>`;
   fRow += '<td></td><td></td></tr>';
   tfoot.innerHTML = fRow;
 
@@ -1951,9 +1977,18 @@ function addAnprRow() {
   }
 }
 
-// ── Add a new day column (prompts for label, appends to all agents)
+// ── Delete a day column by index
+function deleteAnprDay(di) {
+  if (anprDays.length <= 1) { alert('Cannot remove the last day column.'); return; }
+  if (!confirm(`Remove day "${anprDays[di]}" and all its scan/hit data?`)) return;
+  anprDays.splice(di, 1);
+  anprData.forEach(r => r.days.splice(di, 1));
+  renderAnprTable();
+}
+
+// ── Add a new day column (appends to all agents)
 function addAnprDay() {
-  const label = prompt('Enter day label (e.g. 04 Jun 2026):', `0${anprDays.length+1} Jun 2026`) || `Day ${anprDays.length+1}`;
+  const label = prompt('Enter day label (e.g. 04 Jun 2026):', '') || `Day ${anprDays.length+1}`;
   anprDays.push(label);
   anprData.forEach(r => r.days.push({scans:0, hits:0}));
   renderAnprTable();
