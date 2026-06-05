@@ -1,0 +1,2529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Recovery Unit — Editable Operations Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  /* ── Liquid Glass Black + Crimson Red ── */
+  --red:        #e8001c;
+  --red-bright: #ff1a35;
+  --red-glow:   rgba(232,0,28,0.35);
+  --red-soft:   rgba(232,0,28,0.12);
+  --red-faint:  rgba(232,0,28,0.06);
+
+  --bg:         #040404;          /* near-pure black */
+  --bg2:        #080808;
+
+  /* glass layers */
+  --glass:      rgba(255,255,255,0.035);
+  --glass2:     rgba(255,255,255,0.06);
+  --glass3:     rgba(255,255,255,0.10);
+  --glass-red:  rgba(232,0,28,0.08);
+
+  /* borders */
+  --border:     rgba(255,255,255,0.08);
+  --border2:    rgba(255,255,255,0.14);
+  --border-red: rgba(232,0,28,0.45);
+
+  /* text */
+  --text:       #f0f0f0;
+  --text2:      #b0b0b0;
+  --muted:      rgba(255,255,255,0.35);
+
+  /* accents */
+  --accent:     #e8001c;   /* primary = red */
+  --accent2:    #ff6680;   /* soft red / rose */
+  --accent3:    #ff9900;   /* amber warm */
+  --accent4:    #ff3350;   /* bright red */
+  --ok:         #00e5a0;   /* keep green for "good" states only */
+
+  /* bank palette */
+  --wesbank:    #0070d8;
+  --stdbank:    #4a6fa5;
+  --bmw:        #6ab0ff;
+  --absa:       #e8001c;
+  --imas:       #9966cc;
+  --marquis:    #00aa55;
+  --mq:         #dd7700;
+}
+
+/* ── LIGHT THEME ── */
+body.light-theme {
+  --red:        #c8001a;
+  --red-bright: #e0001c;
+  --red-glow:   rgba(200,0,26,0.25);
+  --red-soft:   rgba(200,0,26,0.10);
+  --red-faint:  rgba(200,0,26,0.05);
+
+  --bg:         #f0f0f2;
+  --bg2:        #e6e6ea;
+
+  --glass:      rgba(255,255,255,0.70);
+  --glass2:     rgba(255,255,255,0.80);
+  --glass3:     rgba(255,255,255,0.90);
+  --glass-red:  rgba(200,0,26,0.06);
+
+  --border:     rgba(0,0,0,0.10);
+  --border2:    rgba(0,0,0,0.16);
+  --border-red: rgba(200,0,26,0.40);
+
+  --text:       #1a1a1a;
+  --text2:      #444444;
+  --muted:      rgba(0,0,0,0.45);
+
+  --accent:     #c8001a;
+  --accent2:    #cc3355;
+  --accent3:    #cc7700;
+  --accent4:    #dd2244;
+  --ok:         #00aa77;
+
+  --wesbank:    #0055bb;
+  --stdbank:    #3a5a8a;
+  --bmw:        #2277cc;
+  --absa:       #c8001a;
+  --imas:       #7744aa;
+  --marquis:    #008844;
+  --mq:         #aa5500;
+}
+
+body.light-theme {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(232,0,28,0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 90% 100%, rgba(232,0,28,0.10) 0%, transparent 50%);
+}
+
+body.light-theme #app-header {
+  background: rgba(240,236,236,0.88);
+}
+
+body.light-theme #tab-bar {
+  background: rgba(235,232,232,0.85);
+}
+
+body.light-theme .hdr-brand h1 { color: #111; }
+body.light-theme .hdr-date { color: rgba(180,0,20,0.9); }
+
+body.light-theme .tab-btn { color: rgba(0,0,0,0.45); }
+body.light-theme .tab-btn:hover { color: rgba(180,0,20,0.85); }
+body.light-theme .tab-btn.active { color: #111; }
+
+body.light-theme .card {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+body.light-theme .card::before {
+  background: linear-gradient(90deg,transparent,rgba(200,0,26,0.35),rgba(255,255,255,0.5),transparent);
+}
+
+body.light-theme .kpi {
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+body.light-theme .kpi-val { color: #111; }
+body.light-theme .kpi-val.blue  { color: #0055bb; }
+body.light-theme .kpi-val.green { color: #008855; }
+body.light-theme .kpi-val.amber { color: #aa6600; }
+body.light-theme .kpi-val.red   { color: #c8001a; text-shadow: none; }
+
+body.light-theme .card-title { color: #111; }
+
+body.light-theme thead th {
+  background: rgba(0,0,0,0.03);
+  border-bottom-color: rgba(200,0,26,0.2);
+}
+body.light-theme tbody tr { border-bottom-color: rgba(0,0,0,0.05); }
+body.light-theme tbody tr:hover { background: rgba(200,0,26,0.04); }
+body.light-theme tbody td { color: var(--text); }
+body.light-theme tbody td:first-child { color: var(--muted); }
+body.light-theme tfoot td { color: #c8001a; border-top-color: rgba(200,0,26,0.35); }
+
+body.light-theme .ctrl-btn {
+  border-color: rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.04);
+  color: rgba(0,0,0,0.65);
+}
+body.light-theme .ctrl-btn:hover { border-color: rgba(200,0,26,0.45); color: #111; background: rgba(200,0,26,0.07); }
+body.light-theme .ctrl-btn.primary { background: rgba(200,0,26,0.10); border-color: rgba(200,0,26,0.45); color: #c8001a; }
+
+body.light-theme .chip {
+  background: rgba(255,255,255,0.80);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+body.light-theme .chip-val { color: #111; }
+body.light-theme .chip.good { border-left-color: #00aa77; }
+body.light-theme .chip.warn { border-left-color: #cc7700; }
+body.light-theme .chip.bad  { border-left-color: #c8001a; }
+
+body.light-theme .mon-block { border-color: rgba(0,0,0,0.10); background: rgba(255,255,255,0.65); }
+body.light-theme .mon-block.active { border-color: rgba(200,0,26,0.4); background: rgba(200,0,26,0.06); }
+body.light-theme .mon-val { color: #111; }
+body.light-theme .mon-block.active .mon-val { color: #c8001a; text-shadow: none; }
+
+body.light-theme footer {
+  background: rgba(230,228,228,0.6);
+  border-top-color: rgba(200,0,26,0.12);
+}
+
+body.light-theme #save-banner {
+  background: rgba(200,0,26,0.08);
+}
+
+body.light-theme .live-pill {
+  background: rgba(200,0,26,0.08);
+}
+
+body.light-theme .baro-header {
+  background: linear-gradient(90deg, rgba(200,0,26,0.06), rgba(240,236,236,0.7));
+  border-color: rgba(200,0,26,0.18);
+}
+body.light-theme .baro-body {
+  border-color: rgba(200,0,26,0.18);
+}
+body.light-theme .baro-title { color: #111; text-shadow: none; }
+body.light-theme .m-bar-wrap { background: rgba(0,0,0,0.07); }
+body.light-theme .agent-av {
+  background: rgba(200,0,26,0.08);
+  border-color: rgba(200,0,26,0.25);
+}
+body.light-theme .agent-name { color: #222; }
+body.light-theme .agent-bar-wrap { background: rgba(0,0,0,0.08); }
+body.light-theme .agent-hits { color: #c8001a; }
+
+/* Theme toggle button */
+#theme-toggle {
+  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;
+  letter-spacing:2px;padding:6px 14px;border-radius:8px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.07);
+  color:rgba(255,255,255,0.75);
+  cursor:pointer;text-transform:uppercase;white-space:nowrap;
+  backdrop-filter:blur(8px);
+  transition:all .2s;
+  display:flex;align-items:center;gap:6px;
+}
+#theme-toggle:hover {
+  border-color:rgba(232,0,28,0.5);
+  color:#fff;
+  background:rgba(232,0,28,0.10);
+}
+body.light-theme #theme-toggle {
+  border-color:rgba(0,0,0,0.14);
+  background:rgba(0,0,0,0.05);
+  color:rgba(0,0,0,0.65);
+}
+body.light-theme #theme-toggle:hover {
+  border-color:rgba(200,0,26,0.45);
+  color:#111;
+  background:rgba(200,0,26,0.08);
+}
+
+/* ── RESET + BASE ── */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(232,0,28,0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 90% 100%, rgba(232,0,28,0.10) 0%, transparent 50%);
+  color:var(--text);
+  font-family:'Exo 2',sans-serif;
+  font-size:13px;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* subtle noise/grain overlay */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+  pointer-events:none;z-index:0;opacity:.6;
+}
+
+/* ── HEADER ── */
+#app-header{
+  background: rgba(6,0,0,0.85);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border-bottom: 1px solid var(--border-red);
+  box-shadow: 0 1px 0 rgba(232,0,28,0.15), 0 8px 32px rgba(0,0,0,0.6);
+  padding:0 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:66px;position:sticky;top:0;z-index:200;
+}
+.hdr-brand h1{
+  font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;
+  letter-spacing:5px;text-transform:uppercase;color:#fff;
+}
+.hdr-brand h1 span{
+  color:var(--red-bright);
+  text-shadow: 0 0 20px rgba(232,0,28,0.6);
+}
+.hdr-brand p{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:2px;}
+.hdr-right{display:flex;align-items:center;gap:16px;}
+.hdr-date{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,120,130,0.9);letter-spacing:2px;text-align:right;}
+.hdr-date span{display:block;color:var(--muted);font-size:9px;margin-top:2px;}
+.live-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(232,0,28,0.10);
+  border:1px solid rgba(232,0,28,0.35);
+  border-radius:20px;padding:4px 12px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  color:var(--red-bright);letter-spacing:1px;
+  backdrop-filter:blur(8px);
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red-bright);animation:blink 1.4s infinite;box-shadow:0 0 6px var(--red-bright);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+
+/* ── SAVE BANNER ── */
+#save-banner{
+  background:rgba(232,0,28,0.12);border:1px solid var(--border-red);
+  border-radius:8px;padding:9px 18px;margin:10px 32px;
+  display:none;align-items:center;gap:10px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  color:var(--red-bright);letter-spacing:1px;
+  backdrop-filter:blur(8px);
+}
+#save-banner.show{display:flex;}
+
+/* ── TABS ── */
+#tab-bar{
+  background:rgba(8,0,0,0.75);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-end;padding:0 32px;gap:0;
+  position:sticky;top:66px;z-index:190;
+}
+.tab-btn{
+  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:13px;
+  letter-spacing:2px;text-transform:uppercase;
+  padding:0 22px;height:48px;border:none;background:transparent;
+  color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all 0.25s;white-space:nowrap;
+}
+.tab-btn:hover{color:rgba(255,150,160,0.9);border-bottom-color:rgba(232,0,28,0.3);}
+.tab-btn.active{
+  color:#fff;border-bottom-color:var(--red-bright);
+  text-shadow:0 0 12px rgba(232,0,28,0.5);
+}
+.tab-btn .tab-dot{width:5px;height:5px;border-radius:50%;background:var(--red-bright);display:inline-block;margin-left:6px;vertical-align:middle;box-shadow:0 0 5px var(--red);}
+
+/* ── PANELS ── */
+.tab-panel{display:none;padding:24px 32px 48px;position:relative;z-index:1;}
+.tab-panel.active{display:block;}
+
+/* ── SECTION LABEL ── */
+.sec-label{
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.sec-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border-red),transparent);}
+.sec-label i{color:var(--red-bright);font-style:normal;text-shadow:0 0 8px var(--red);}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;}
+.g6{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;}
+.g32{display:grid;grid-template-columns:3fr 2fr;gap:16px;}
+.g23{display:grid;grid-template-columns:2fr 3fr;gap:16px;}
+
+/* ── LIQUID GLASS CARD ── */
+.card{
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+  transition: border-color .25s, box-shadow .25s;
+}
+.card:hover{
+  border-color: rgba(232,0,28,0.25);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(232,0,28,0.08), inset 0 1px 0 rgba(255,255,255,0.09);
+}
+/* top shimmer line */
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(232,0,28,0.5),rgba(255,255,255,0.15),transparent);
+}
+.card.green::before{background:linear-gradient(90deg,transparent,var(--ok),transparent);}
+.card.amber::before{background:linear-gradient(90deg,transparent,var(--accent3),transparent);}
+.card.red::before{background:linear-gradient(90deg,transparent,var(--red-bright),transparent);}
+
+.card-title{
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:15px;
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;color:#fff;
+}
+.card-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;}
+
+/* ── LIQUID GLASS KPI ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;}
+.kpi{
+  background:var(--glass);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--border);
+  border-radius:14px;padding:16px 14px;
+  position:relative;overflow:hidden;
+  box-shadow:0 2px 16px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.06);
+  transition:transform .2s,border-color .2s;
+}
+.kpi:hover{transform:translateY(-1px);border-color:rgba(232,0,28,0.3);}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.kpi.k-blue::after{background:linear-gradient(90deg,#0070d8,#48a8ff);}
+.kpi.k-green::after{background:linear-gradient(90deg,#00aa55,#00e5a0);}
+.kpi.k-amber::after{background:linear-gradient(90deg,#dd7700,#ff9900);}
+.kpi.k-red::after{background:linear-gradient(90deg,var(--red),var(--red-bright));}
+.kpi-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.kpi-val{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:36px;line-height:1;color:#fff;}
+.kpi-val.blue{color:#48a8ff;}
+.kpi-val.green{color:#00e5a0;}
+.kpi-val.amber{color:#ff9900;}
+.kpi-val.red{color:var(--red-bright);text-shadow:0 0 16px rgba(232,0,28,0.4);}
+.kpi-hint{font-size:10px;color:var(--muted);margin-top:4px;}
+
+/* ── EDITABLE INPUT ── */
+.ef{
+  background:transparent;border:none;color:inherit;font:inherit;
+  border-bottom:1px dashed rgba(255,255,255,0.15);
+  cursor:text;outline:none;transition:border-color .2s,background .2s;padding:1px 2px;
+}
+.ef:focus{border-bottom-color:var(--red-bright);background:rgba(232,0,28,0.06);border-radius:3px 3px 0 0;}
+.kpi-val input.ef{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:inherit;text-align:center;color:inherit;width:100%;}
+input.ef[type=number]{-moz-appearance:textfield;}
+input.ef[type=number]::-webkit-outer-spin-button,input.ef[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:11px;}
+thead th{
+  padding:9px 8px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);
+  background:rgba(255,255,255,0.03);
+  border-bottom:1px solid rgba(232,0,28,0.2);
+  text-align:right;white-space:nowrap;
+}
+thead th:first-child{text-align:left;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.04);transition:background .15s;}
+tbody tr:hover{background:rgba(232,0,28,0.05);}
+tbody td{padding:8px 8px;text-align:right;color:var(--text);}
+tbody td:first-child{text-align:left;color:var(--muted);}
+tfoot td{
+  padding:9px 8px;text-align:right;color:var(--red-bright);font-weight:700;
+  border-top:1px solid rgba(232,0,28,0.4);font-size:12px;
+}
+tfoot td:first-child{text-align:left;}
+.ce{
+  background:transparent;border:none;color:inherit;font:inherit;
+  width:100%;text-align:inherit;cursor:text;outline:none;
+  border-bottom:1px dashed transparent;transition:border-color .2s;
+}
+.ce:focus{border-bottom-color:var(--red-bright);background:rgba(232,0,28,0.06);}
+.ce[type=number]{-moz-appearance:textfield;text-align:right;}
+.ce[type=number]::-webkit-outer-spin-button,.ce[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+td.pos,.pos-cell{color:#00e5a0 !important;}
+td.zero,.zero-cell{color:rgba(255,255,255,0.15) !important;}
+td.warn-cell{color:#ff9900 !important;}
+td.flag-cell{color:var(--red-bright) !important;}
+
+/* ── MANDATE BARS ── */
+.mandate-list{display:flex;flex-direction:column;gap:10px;}
+.m-row{display:flex;align-items:center;gap:10px;}
+.m-rank{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;width:22px;color:var(--muted);flex-shrink:0;}
+.m-name{font-family:'Share Tech Mono',monospace;font-size:10px;width:78px;flex-shrink:0;letter-spacing:.5px;}
+.m-bar-wrap{flex:1;background:rgba(255,255,255,0.05);border-radius:3px;height:8px;overflow:hidden;}
+.m-bar{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.16,1,.3,1);}
+.m-count{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;width:26px;text-align:right;flex-shrink:0;}
+.m-pct{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);width:36px;text-align:right;flex-shrink:0;}
+
+/* ── AGENT ROWS ── */
+.agent-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.agent-row:last-child{border-bottom:none;}
+.agent-av{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(232,0,28,0.12);border:1px solid rgba(232,0,28,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--red-bright);flex-shrink:0;
+}
+.agent-name{flex:1;font-size:11px;color:var(--text);}
+.agent-bar-wrap{width:70px;background:rgba(255,255,255,0.06);border-radius:2px;height:5px;overflow:hidden;flex-shrink:0;}
+.agent-bar{height:100%;background:var(--red-bright);border-radius:2px;}
+.agent-hits{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--red-bright);width:28px;text-align:right;flex-shrink:0;}
+
+/* ── INSIGHTS ── */
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.chip{
+  background:var(--glass);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.chip.good{border-left:3px solid #00e5a0;}
+.chip.warn{border-left:3px solid #ff9900;}
+.chip.bad{border-left:3px solid var(--red-bright);}
+.chip.info{border-left:3px solid rgba(255,100,120,0.8);}
+.chip-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.chip-val{font-size:12px;font-weight:600;color:#fff;}
+
+/* ── MONTH COMPARE ── */
+.mon-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+.mon-block{
+  background:var(--glass);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.mon-block.active{border-color:rgba(232,0,28,0.4);background:rgba(232,0,28,0.07);}
+.mon-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;}
+.mon-val{font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:#fff;line-height:1;margin-top:4px;}
+.mon-block.active .mon-val{color:var(--red-bright);text-shadow:0 0 16px rgba(232,0,28,0.4);}
+.mon-growth{font-size:11px;color:#00e5a0;margin-top:3px;}
+
+/* ── BAROMETER ── */
+.baro-header{
+  background:linear-gradient(90deg,rgba(232,0,28,0.08),rgba(0,0,0,0.6));
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:16px 16px 0 0;
+  border:1px solid rgba(232,0,28,0.2);border-bottom:none;
+  padding:22px 26px;display:flex;justify-content:space-between;align-items:flex-start;
+}
+.baro-title{
+  font-family:'Rajdhani',sans-serif;font-size:30px;font-weight:700;
+  letter-spacing:4px;color:#fff;
+  text-shadow:0 0 24px rgba(232,0,28,0.3);
+}
+.baro-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,100,120,0.8);letter-spacing:2px;margin-top:3px;}
+.baro-body{
+  background:var(--glass);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(232,0,28,0.2);border-top:none;
+  border-radius:0 0 16px 16px;padding:26px;
+}
+
+/* ── ACH BAR ── */
+.ach-bar-wrap{
+  background:rgba(255,255,255,0.05);border-radius:4px;height:12px;
+  overflow:hidden;position:relative;margin-top:8px;
+}
+.ach-bar-fill{
+  height:100%;
+  background:linear-gradient(90deg,rgba(232,0,28,0.5),var(--red-bright));
+  border-radius:4px;transition:width 1s;
+}
+
+/* ── CONTROLS ── */
+.ctrl-row{display:flex;gap:10px;margin-bottom:18px;align-items:center;flex-wrap:wrap;}
+.ctrl-btn{
+  font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:2px;font-size:12px;
+  padding:8px 16px;border-radius:8px;
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(8px);
+  color:rgba(255,255,255,0.7);cursor:pointer;text-transform:uppercase;
+  transition:all .2s;
+}
+.ctrl-btn:hover{border-color:rgba(232,0,28,0.5);color:#fff;background:rgba(232,0,28,0.08);}
+.ctrl-btn.primary{background:rgba(232,0,28,0.12);border-color:rgba(232,0,28,0.5);color:var(--red-bright);}
+.ctrl-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;}
+.del-btn{background:transparent;border:none;color:rgba(232,0,28,0.5);cursor:pointer;font-size:14px;padding:0 4px;opacity:.6;transition:opacity .2s,color .2s;}
+.del-btn:hover{opacity:1;color:var(--red-bright);}
+
+footer{
+  border-top:1px solid rgba(232,0,28,0.15);padding:18px 32px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;
+  position:relative;z-index:1;
+  background:rgba(4,0,0,0.5);backdrop-filter:blur(12px);
+}
+
+canvas{max-width:100%;}
+.chart-wrap{position:relative;height:220px;}
+.chart-wrap-lg{position:relative;height:280px;}
+
+@media(max-width:900px){
+  .kpi-grid,.g6{grid-template-columns:repeat(3,1fr);}
+  .g2,.g3,.g4,.g32,.g23{grid-template-columns:1fr;}
+  .tab-panel{padding:16px;}
+  #app-header,#tab-bar{padding:0 16px;}
+  #save-banner{margin:8px 16px;}
+}
+</style>
+</head>
+<body>
+
+<header id="app-header">
+  <div class="hdr-brand">
+    <h1>CRM <span>Recovery</span> Unit</h1>
+    <p>Recovery Unit Daily Log &nbsp;|&nbsp; Enterprise Software Solutions (Pty) Ltd &nbsp;|&nbsp; Mission 223</p>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-date">
+      <input class="ef" id="hdr-date-val" value="03 JUN 2026" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ff6680;letter-spacing:2px;text-align:right;width:130px;" oninput="recalcAll();autoSave()">
+      <span>VEHICLE ASSET RECOVERY &nbsp;|&nbsp; NATIONAL</span>
+    </div>
+    <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">☀ LIGHT</button>
+    <button onclick="savePage()" style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:2px;padding:6px 14px;border-radius:8px;border:1px solid rgba(232,0,28,0.5);background:rgba(232,0,28,0.12);color:#ff3350;cursor:pointer;text-transform:uppercase;white-space:nowrap;backdrop-filter:blur(8px);">↓ SAVE &amp; SHARE</button>
+    <button onclick="showMasterClearModal()" style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:2px;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.6);cursor:pointer;text-transform:uppercase;white-space:nowrap;backdrop-filter:blur(8px);">⊗ NEW MONTH</button>
+    <div style="display:flex;align-items:center;gap:7px;">
+      <div id="autosave-dot" title="Auto-save status" style="width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.12);transition:background 0.4s,box-shadow 0.4s;flex-shrink:0;"></div>
+      <button onclick="forceSave()" title="Force save to cloud now" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;padding:6px 14px;border-radius:8px;border:1px solid rgba(0,229,160,0.5);background:rgba(0,229,160,0.08);color:#00e5a0;cursor:pointer;text-transform:uppercase;white-space:nowrap;">☁ SAVE NOW</button>
+      <div id="sync-status" class="live-pill" title="Cloud sync status"><span class="live-dot"></span><span id="sync-label">SYNC</span></div>
+    </div>
+  </div>
+</header>
+
+<div id="save-banner">✓ &nbsp;File saved — share or open this HTML on any device to see your data.</div>
+
+<!-- MASTER CLEAR MODAL -->
+<div id="clear-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:#111520;border:2px solid #ff4d6d;border-radius:14px;padding:36px 40px;max-width:440px;width:90%;text-align:center;box-shadow:0 0 60px rgba(255,77,109,0.3);">
+    <div style="font-size:36px;margin-bottom:12px;">⚠</div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:3px;color:#ff4d6d;margin-bottom:8px;">NEW MONTH CLEAR</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#5a7099;line-height:1.8;margin-bottom:24px;">
+      This will permanently erase ALL data:<br>
+      Repo stats · ANPR scans · EDC records<br>
+      Ext EDC · Tracer · FTV repos · Barometer values<br><br>
+      <span style="color:#ffb340;">Tip: click SAVE &amp; SHARE first to keep a copy<br>of this month's data as a standalone HTML file.</span><br><br>
+      <span style="color:#ff4d6d;">This action cannot be undone.</span>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button onclick="hideMasterClearModal()" style="font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:2px;font-size:13px;padding:10px 24px;border-radius:8px;border:1px solid #2a3a5c;background:#181e2e;color:#d8e6f5;cursor:pointer;text-transform:uppercase;">CANCEL</button>
+      <button onclick="savePage()" style="font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:2px;font-size:13px;padding:10px 24px;border-radius:8px;border:1px solid #00b4ff;background:rgba(0,180,255,0.12);color:#ff6680;cursor:pointer;text-transform:uppercase;">SAVE FIRST</button>
+      <button onclick="masterClear()" style="font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:2px;font-size:13px;padding:10px 24px;border-radius:8px;border:1px solid #ff4d6d;background:rgba(255,77,109,0.15);color:#ff4d6d;cursor:pointer;text-transform:uppercase;">CLEAR ALL</button>
+    </div>
+  </div>
+</div>
+
+<nav id="tab-bar">
+  <button class="tab-btn active" data-tab="t1">Tab 1 — Repo Stats<span class="tab-dot"></span></button>
+  <button class="tab-btn" data-tab="t2">Tab 2 — ANPR Scans<span class="tab-dot"></span></button>
+  <button class="tab-btn" data-tab="t3">Tab 3 — ANPR EDC Stats<span class="tab-dot"></span></button>
+  <button class="tab-btn" data-tab="t4">Tab 4 — Repo Race<span class="tab-dot"></span></button>
+  <button class="tab-btn" data-tab="t5">Tab 5 — Ext EDC &amp; Tracer<span class="tab-dot"></span></button>
+</nav>
+
+<!-- ══════════ TAB 1 ══════════ -->
+<div class="tab-panel active" id="t1">
+  <div class="ctrl-row">
+    <span class="ctrl-label">CLICK ANY VALUE TO EDIT — TOTALS &amp; CHARTS UPDATE INSTANTLY</span>
+    <button class="ctrl-btn primary" onclick="recalcAll()">⟳ RECALCULATE ALL</button>
+    <button class="ctrl-btn" onclick="savePage()">↓ SAVE PAGE</button>
+  </div>
+
+  <div class="sec-label"><i>●</i> CRM Repository Performance — June 2026</div>
+
+  <div class="kpi-grid">
+    <div class="kpi k-blue">
+      <div class="kpi-lbl">Units MTD</div>
+      <div class="kpi-val blue"><input class="ef" id="k-units-mtd" type="number" value="27" oninput="recalcAll()"></div>
+      <div class="kpi-hint">Month to date</div>
+    </div>
+    <div class="kpi k-blue">
+      <div class="kpi-lbl">Daily Average</div>
+      <div class="kpi-val blue" id="k-daily-avg">9.00</div>
+      <div class="kpi-hint">Auto-calculated</div>
+    </div>
+    <div class="kpi k-amber">
+      <div class="kpi-lbl">Period Target</div>
+      <div class="kpi-val amber"><input class="ef" id="k-target" type="number" value="200" oninput="recalcAll()"></div>
+      <div class="kpi-hint">Monthly target</div>
+    </div>
+    <div class="kpi k-red">
+      <div class="kpi-lbl">Outstanding</div>
+      <div class="kpi-val red" id="k-outstanding">173</div>
+      <div class="kpi-hint">Auto-calculated</div>
+    </div>
+    <div class="kpi k-green">
+      <div class="kpi-lbl">Daily Req.</div>
+      <div class="kpi-val green" id="k-daily-req">9.11</div>
+      <div class="kpi-hint">Units/day needed</div>
+    </div>
+    <div class="kpi k-amber">
+      <div class="kpi-lbl">Peak Output</div>
+      <div class="kpi-val amber" id="k-peak">13</div>
+      <div class="kpi-hint">Best single day</div>
+    </div>
+  </div>
+
+  <div class="g32" style="margin-bottom:18px;">
+    <div class="card">
+      <div class="card-title">Daily Recovery Breakdown</div>
+      <div class="card-sub">EDIT ANY CELL — TOTALS &amp; CHARTS UPDATE AUTOMATICALLY</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Total</th>
+              <th style="color:var(--mq)">MQ</th>
+              <th style="color:var(--bmw)">BMW</th>
+              <th style="color:var(--wesbank)">Wesbank</th>
+              <th style="color:var(--absa)">ABSA</th>
+              <th style="color:var(--stdbank)">STD Bk</th>
+              <th style="color:var(--imas)">IMAS</th>
+              <th>MTD Run</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="daily-tbody"></tbody>
+          <tfoot>
+            <tr>
+              <td>TOTALS</td>
+              <td id="ft-total"></td><td id="ft-mq"></td><td id="ft-bmw"></td>
+              <td id="ft-wb"></td><td id="ft-absa"></td><td id="ft-std"></td>
+              <td id="ft-imas"></td><td id="ft-mtd"></td><td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <button class="ctrl-btn" onclick="addDailyRow()" style="margin-top:8px;font-size:11px;padding:5px 12px;">+ ADD ROW</button>
+
+      <div style="margin-top:18px;">
+        <div class="card-sub" style="margin-bottom:8px;">QUEUE ASSIGNMENTS</div>
+        <table>
+          <thead><tr><th>Date</th><th>Qty Assigned</th><th>No. Queues</th><th></th></tr></thead>
+          <tbody id="assign-tbody">
+            <tr>
+              <td><input class="ce" value="02 Jun 2026" style="text-align:left;width:90px;"></td>
+              <td><input class="ce" type="number" value="61"></td>
+              <td><input class="ce" type="number" value="8"></td>
+              <td><button class="del-btn" onclick="this.closest('tr').remove();autoSave()">✕</button></td>
+            </tr>
+            <tr>
+              <td><input class="ce" value="03 Jun 2026" style="text-align:left;width:90px;"></td>
+              <td><input class="ce" type="number" value="24"></td>
+              <td><input class="ce" type="number" value="5"></td>
+              <td><button class="del-btn" onclick="this.closest('tr').remove();autoSave()">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="ctrl-btn" onclick="addAssignRow()" style="margin-top:6px;font-size:11px;padding:5px 12px;">+ ADD ROW</button>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="card">
+        <div class="card-title">Portfolio Distribution</div>
+        <div class="card-sub">MTD UNITS BY MANDATE</div>
+        <div class="chart-wrap"><canvas id="portfolioChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Month-on-Month</div>
+        <div class="card-sub">SAME PERIOD PRIOR MONTH VS CURRENT</div>
+        <div class="mon-compare">
+          <div class="mon-block">
+            <div class="mon-lbl" id="mom-prev-lbl">PRIOR MONTH</div>
+            <div class="mon-val"><input class="ef" id="may-val" value="1" type="number" oninput="recalcAll();autoSave()" style="font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;text-align:center;width:100%;"></div>
+          </div>
+          <div class="mon-block active">
+            <div class="mon-lbl" id="mom-curr-lbl">CURRENT MONTH</div>
+            <div class="mon-val" id="jun-val-disp" style="color:var(--accent)">27</div>
+            <div class="mon-growth" id="mom-growth">▲ +2,600%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div class="card-title">Daily Recovery Trend</div>
+    <div class="card-sub">BARS UPDATE WHEN YOU EDIT THE TABLE ABOVE</div>
+    <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+  </div>
+
+  <div class="sec-label"><i>●</i> Auto-Generated Insights</div>
+  <div class="insight-grid">
+    <div class="chip good"><div class="chip-lbl">MTD vs May (Same Period)</div><div class="chip-val" id="ins-mom">+2,600% — 27 vs 1 unit</div></div>
+    <div class="chip warn"><div class="chip-lbl">Pace Status</div><div class="chip-val" id="ins-pace">−2 units behind pace · Need 9.6/day · Avg 9.0</div></div>
+    <div class="chip good"><div class="chip-lbl">Top Mandate</div><div class="chip-val" id="ins-top-mandate">Wesbank dominant — 21 units (77.8% of total)</div></div>
+    <div class="chip info"><div class="chip-lbl">Peak Day</div><div class="chip-val" id="ins-peak">03 Jun — 13 recoveries, best single-day output</div></div>
+  </div>
+</div>
+
+<!-- ══════════ TAB 2 ══════════ -->
+<div class="tab-panel" id="t2">
+  <div class="ctrl-row">
+    <span class="ctrl-label">EDIT SCANS &amp; HITS — ADD DAYS OR AGENTS — ALL TOTALS &amp; CHARTS UPDATE LIVE</span>
+    <button class="ctrl-btn primary" onclick="addAnprDay()">+ ADD DAY</button>
+    <button class="ctrl-btn primary" onclick="addAnprRow()">+ ADD AGENT</button>
+    <button class="ctrl-btn" onclick="savePage()">↓ SAVE PAGE</button>
+  </div>
+
+  <div class="sec-label"><i>●</i> ANPR | Recovery Unit Daily Log | CRM OPERATIONS</div>
+
+  <!-- KPI strip: 4 cards, all auto-calc -->
+  <div class="g4" style="margin-bottom:20px;">
+    <div class="kpi k-green" style="border-radius:8px;">
+      <div class="kpi-lbl">Scans MTD</div>
+      <div class="kpi-val green" id="anpr-mtd-disp">127,004</div>
+      <div class="kpi-hint">Auto-calculated</div>
+    </div>
+    <div class="kpi k-blue" style="border-radius:8px;">
+      <div class="kpi-lbl">Daily Average</div>
+      <div class="kpi-val blue" id="anpr-avg-disp">42,335</div>
+      <div class="kpi-hint">Auto-calculated</div>
+    </div>
+    <div class="kpi k-green" style="border-radius:8px;">
+      <div class="kpi-lbl">Total Positive Hits</div>
+      <div class="kpi-val green" id="anpr-hits-disp">223</div>
+      <div class="kpi-hint">All days combined</div>
+    </div>
+    <div class="kpi k-amber" style="border-radius:8px;">
+      <div class="kpi-lbl">Daily Target</div>
+      <div class="kpi-val amber"><input class="ef" id="anpr-target" type="number" value="50000" oninput="recalcTab2()" style="font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;color:var(--accent3);text-align:center;width:120px;"></div>
+      <div class="kpi-hint">Scans per day</div>
+    </div>
+  </div>
+
+  <div class="g32">
+    <div class="card">
+      <div class="card-title">Agent Scan Log</div>
+      <div class="card-sub">EDIT CELLS · + ADD DAY APPENDS NEW COLUMN · + ADD AGENT ADDS ROW</div>
+      <div class="tbl-wrap">
+        <table id="anpr-table">
+          <thead id="anpr-thead"></thead>
+          <tbody id="anpr-tbody"></tbody>
+          <tfoot id="anpr-tfoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="card">
+        <div class="card-title">Agent Hit Ranking</div>
+        <div class="card-sub">TOTAL POSITIVE HITS (ALL DAYS) — LIVE</div>
+        <div id="agent-rank-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Daily Scan Volume</div>
+        <div class="card-sub">SCANS VS TARGET PER DAY</div>
+        <div class="chart-wrap"><canvas id="scanTrendChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <div class="card-title">Positive Hits by Day</div>
+    <div class="card-sub">TOTAL POSITIVE HITS PER DAY ACROSS ALL AGENTS</div>
+    <div class="chart-wrap"><canvas id="hitsPerDayChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ══════════ TAB 3 — ANPR EDC STATS ══════════ -->
+<div class="tab-panel" id="t3">
+  <div class="ctrl-row">
+    <span class="ctrl-label">EDIT EDC VALUES — CHARTS &amp; LEADERBOARD UPDATE LIVE</span>
+    <button class="ctrl-btn primary" onclick="recalcTab3()">⟳ RECALCULATE</button>
+    <button class="ctrl-btn" onclick="savePage()">↓ SAVE PAGE</button>
+  </div>
+
+  <div class="sec-label"><i>●</i> ANPR EDC MTD Upliftments</div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">EDC Upliftments Per Agent</div>
+      <div class="card-sub">MONTH TO DATE — EDIT VALUES BELOW</div>
+      <div class="tbl-wrap" style="margin-bottom:12px;">
+        <table>
+          <thead><tr><th>Agent Name</th><th>MTD Upliftments</th><th>Share %</th><th></th></tr></thead>
+          <tbody id="edc-tbody"></tbody>
+          <tfoot><tr><td>TOTAL</td><td id="edc-total-ft"></td><td>100%</td><td></td></tr></tfoot>
+        </table>
+      </div>
+      <button class="ctrl-btn" onclick="addEdcRow()" style="font-size:11px;padding:5px 12px;">+ ADD AGENT</button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="card">
+        <div class="card-title">EDC Bar Chart</div>
+        <div class="card-sub">AUTO-UPDATES ON EDIT</div>
+        <div class="chart-wrap"><canvas id="edcBarChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Leaderboard</div>
+        <div class="card-sub">RANKED BY MTD UPLIFTMENTS</div>
+        <div id="edc-leaderboard"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-label" style="margin-top:18px;"><i>●</i> Combined ANPR + EDC Insights</div>
+  <div class="insight-grid">
+    <div class="chip good"><div class="chip-lbl">Top EDC Performers</div><div class="chip-val" id="edc-top">Hope Mapitsi &amp; Thapelo — 4 upliftments each</div></div>
+    <div class="chip warn"><div class="chip-lbl">Zero Upliftments</div><div class="chip-val" id="edc-zero">Tyron Klein — 0 upliftments (vehicle issues)</div></div>
+    <div class="chip info"><div class="chip-lbl">EDC Total MTD</div><div class="chip-val" id="edc-total-ins">21 total upliftments across active agents</div></div>
+    <div class="chip good"><div class="chip-lbl">ANPR + EDC Efficiency</div><div class="chip-val">127K scans → 21 EDC upliftments → 27 repo units</div></div>
+  </div>
+</div>
+
+<!-- ══════════ TAB 4 ══════════ -->
+<div class="tab-panel" id="t4">
+  <div class="ctrl-row">
+    <span class="ctrl-label">RECOVERY BAROMETER — ALL VALUES EDITABLE</span>
+    <button class="ctrl-btn primary" onclick="recalcTab4()">⟳ RECALCULATE</button>
+    <button class="ctrl-btn" onclick="savePage()">↓ SAVE PAGE</button>
+  </div>
+
+  <div class="baro-header">
+    <div>
+      <div class="baro-title">Recovery Barometer</div>
+      <div class="baro-sub">COUNTLESS RECOVERY MANAGEMENT &nbsp;|&nbsp; <input class="ef" value="MISSION 223" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:2px;width:90px;"></div>
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);text-align:right;line-height:1.8;letter-spacing:1px;">
+      <input class="ef" value="03 JUN 2026" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);text-align:right;width:120px;"><br>
+      VEHICLE ASSET RECOVERY, NATIONAL<br>ALL MANDATES COMBINED
+    </div>
+  </div>
+
+  <div class="baro-body">
+    <div class="g23">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:10px 0;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#5a7099;letter-spacing:2px;text-transform:uppercase;">Units Recovered vs Target</div>
+
+        <!-- Thermometer -->
+        <div style="position:relative;width:44px;height:180px;background:#181e2e;border-radius:22px;border:1px solid #1e2a42;overflow:hidden;">
+          <div id="thermo-fill" style="position:absolute;bottom:0;left:0;right:0;height:14%;background:linear-gradient(to top,#00b4ff,rgba(0,180,255,0.4));border-radius:22px;transition:height 1.2s cubic-bezier(.16,1,.3,1);"></div>
+        </div>
+
+        <div style="font-family:'Rajdhani',sans-serif;font-size:36px;font-weight:700;color:#ff6680;" id="thermo-pct">14%</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#5a7099;" id="thermo-label">27 units · Wesbank leads</div>
+        <div id="pace-pill" style="background:rgba(0,229,160,.12);border:1px solid #00e5a0;border-radius:20px;padding:4px 14px;font-family:'Rajdhani',sans-serif;font-size:13px;letter-spacing:2px;color:#00e5a0;">● ON PACE</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#5a7099;text-align:center;line-height:1.8;" id="thermo-sub">Variance: −2 units<br>Required: 9.6/day</div>
+      </div>
+
+      <div>
+        <div class="sec-label" style="margin-bottom:12px;"><i>●</i> Period Performance</div>
+        <div class="g4" style="margin-bottom:18px;">
+          <div class="kpi k-amber" style="border-radius:8px;"><div class="kpi-lbl">Period Target</div>
+            <div class="kpi-val amber"><input class="ef" id="b-target" type="number" value="200" oninput="recalcTab4()" style="font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:var(--accent3);text-align:center;width:90px;"></div></div>
+          <div class="kpi k-blue" style="border-radius:8px;"><div class="kpi-lbl">Day of Period</div>
+            <div class="kpi-val blue"><input class="ef" id="b-day" type="number" value="3" oninput="recalcTab4()" style="font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:var(--accent);text-align:center;width:90px;"></div></div>
+          <div class="kpi" style="border-radius:8px;"><div class="kpi-lbl">Period Length</div>
+            <div class="kpi-val"><input class="ef" id="b-length" type="number" value="21" oninput="recalcTab4()" style="font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;text-align:center;width:90px;"></div></div>
+          <div class="kpi k-green" style="border-radius:8px;"><div class="kpi-lbl">Total Recovered</div>
+            <div class="kpi-val green"><input class="ef" id="b-recovered" type="number" value="27" oninput="recalcTab4()" style="font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:var(--accent2);text-align:center;width:90px;"></div></div>
+        </div>
+
+        <div class="g4" style="margin-bottom:18px;">
+          <div class="kpi k-amber" style="border-radius:8px;"><div class="kpi-lbl">Achievement</div><div class="kpi-val amber" id="b-ach">13.5%</div></div>
+          <div class="kpi k-red" style="border-radius:8px;"><div class="kpi-lbl">Outstanding</div><div class="kpi-val red" id="b-out">173</div></div>
+          <div class="kpi k-green" style="border-radius:8px;"><div class="kpi-lbl">Run Rate Req.</div><div class="kpi-val green" id="b-rr">9.6</div><div class="kpi-hint">p.d.</div></div>
+          <div class="kpi k-blue" style="border-radius:8px;"><div class="kpi-lbl">Variance to Pace</div><div class="kpi-val" id="b-var" style="color:var(--accent4)">−2</div></div>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;">ACHIEVEMENT VS LAST YEAR PACE</span>
+            <span style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--accent3);">94.5%</span>
+          </div>
+          <div class="ach-bar-wrap"><div class="ach-bar-fill" style="width:94.5%"></div></div>
+        </div>
+
+        <div class="sec-label" style="margin-bottom:12px;"><i>●</i> Bank Mandate Tracking</div>
+        <div class="g6" style="margin-bottom:14px;" id="bank-inputs">
+          <div style="text-align:center;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--absa);letter-spacing:1px;">ABSA</div>
+            <input class="ef" id="bk-absa" type="number" value="1" oninput="recalcTab4()" style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--absa);text-align:center;width:50px;">
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--stdbank);letter-spacing:1px;">STD BANK</div>
+            <input class="ef" id="bk-std" type="number" value="2" oninput="recalcTab4()" style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--stdbank);text-align:center;width:50px;">
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--wesbank);letter-spacing:1px;">WESBANK</div>
+            <input class="ef" id="bk-wb" type="number" value="21" oninput="recalcTab4()" style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--wesbank);text-align:center;width:50px;">
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--bmw);letter-spacing:1px;">BMW FS</div>
+            <input class="ef" id="bk-bmw" type="number" value="2" oninput="recalcTab4()" style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--bmw);text-align:center;width:50px;">
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--imas);letter-spacing:1px;">IMAS</div>
+            <input class="ef" id="bk-imas" type="number" value="0" oninput="recalcTab4()" style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--imas);text-align:center;width:50px;">
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--marquis);letter-spacing:1px;">MARQUIS</div>
+            <input class="ef" id="bk-mq" type="number" value="1" oninput="recalcTab4()" style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--marquis);text-align:center;width:50px;">
+          </div>
+        </div>
+
+        <div class="mandate-list" id="mandate-bars"></div>
+
+        <div style="margin-top:18px;">
+          <div class="card-sub" style="margin-bottom:8px;">MANDATE SHARE CHART</div>
+          <div style="height:200px;"><canvas id="mandateChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TAB 5 — EXTERNAL EDC, TRACER & FTV REPOS ══════════ -->
+<div class="tab-panel" id="t5">
+  <div class="ctrl-row">
+    <span class="ctrl-label">EXTERNAL EDC · TRACER · FTV REPOS — ALL FIELDS EDITABLE · TOTALS AUTO-CALCULATE</span>
+    <button class="ctrl-btn primary" onclick="recalcTab5()">⟳ RECALCULATE</button>
+    <button class="ctrl-btn" onclick="savePage()">↓ SAVE PAGE</button>
+  </div>
+
+  <!-- ── KPI STRIP ── -->
+  <div class="sec-label"><i>●</i> External EDC · Tracer · FTV — MTD Summary</div>
+  <div class="g4" style="margin-bottom:20px;">
+    <div class="kpi k-green" style="border-radius:8px;">
+      <div class="kpi-lbl">Ext EDC Upliftments MTD</div>
+      <div class="kpi-val green" id="t5-edc-total">0</div>
+      <div class="kpi-hint">Auto-calculated</div>
+    </div>
+    <div class="kpi k-blue" style="border-radius:8px;">
+      <div class="kpi-lbl">Tracer Repos MTD</div>
+      <div class="kpi-val blue" id="t5-tracer-total">0</div>
+      <div class="kpi-hint">Auto-calculated</div>
+    </div>
+    <div class="kpi k-amber" style="border-radius:8px;">
+      <div class="kpi-lbl">FTV Repos MTD</div>
+      <div class="kpi-val amber" id="t5-ftv-total">0</div>
+      <div class="kpi-hint">Auto-calculated</div>
+    </div>
+    <div class="kpi k-red" style="border-radius:8px;">
+      <div class="kpi-lbl">Combined Total MTD</div>
+      <div class="kpi-val" style="color:#ff4d6d;" id="t5-combined-total">0</div>
+      <div class="kpi-hint">EDC + Tracer + FTV</div>
+    </div>
+  </div>
+
+  <!-- ── THREE TABLES ── -->
+  <div class="g3" style="margin-bottom:18px;">
+
+    <!-- EXTERNAL EDC TABLE -->
+    <div class="card">
+      <div class="card-title" style="color:#00e5a0;">External EDC Upliftments</div>
+      <div class="card-sub">AGENT / COMPANY · DATE · UNITS</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left;">Agent / Company</th>
+              <th>Date</th>
+              <th>Units</th>
+              <th>Bank</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ext-edc-tbody"></tbody>
+          <tfoot>
+            <tr><td>TOTAL</td><td></td><td id="ext-edc-ft" style="color:#00e5a0;">0</td><td></td><td></td><td></td></tr>
+          </tfoot>
+        </table>
+      </div>
+      <button class="ctrl-btn" onclick="addExtEdcRow()" style="margin-top:8px;font-size:11px;padding:5px 12px;">+ ADD RECORD</button>
+    </div>
+
+    <!-- TRACER REPOS TABLE -->
+    <div class="card">
+      <div class="card-title" style="color:#ff6680;">Tracer Repos</div>
+      <div class="card-sub">TRACER AGENT · DATE · UNITS</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left;">Tracer Agent</th>
+              <th>Date</th>
+              <th>Units</th>
+              <th>Bank</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tracer-tbody"></tbody>
+          <tfoot>
+            <tr><td>TOTAL</td><td></td><td id="tracer-ft" style="color:#ff6680;">0</td><td></td><td></td><td></td></tr>
+          </tfoot>
+        </table>
+      </div>
+      <button class="ctrl-btn" onclick="addTracerRow()" style="margin-top:8px;font-size:11px;padding:5px 12px;">+ ADD RECORD</button>
+    </div>
+
+    <!-- FTV REPOS TABLE -->
+    <div class="card">
+      <div class="card-title" style="color:#ffb340;">FTV Repos</div>
+      <div class="card-sub">FTV AGENT · DATE · UNITS</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left;">FTV Agent</th>
+              <th>Date</th>
+              <th>Units</th>
+              <th>Bank</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ftv-tbody"></tbody>
+          <tfoot>
+            <tr><td>TOTAL</td><td></td><td id="ftv-ft" style="color:#ffb340;">0</td><td></td><td></td><td></td></tr>
+          </tfoot>
+        </table>
+      </div>
+      <button class="ctrl-btn" onclick="addFtvRow()" style="margin-top:8px;font-size:11px;padding:5px 12px;">+ ADD RECORD</button>
+    </div>
+  </div>
+
+  <!-- ── CHARTS ROW 1 ── -->
+  <div class="g2" style="margin-bottom:18px;">
+    <div class="card">
+      <div class="card-title">Ext EDC · Tracer · FTV — Comparison</div>
+      <div class="card-sub">MTD TOTALS BY TYPE</div>
+      <div class="chart-wrap"><canvas id="t5-compare-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Combined Units by Agent / Company</div>
+      <div class="card-sub">ALL THREE SOURCES RANKED</div>
+      <div class="chart-wrap"><canvas id="t5-agent-chart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── CHARTS ROW 2 ── -->
+  <div class="g2" style="margin-bottom:18px;">
+    <div class="card">
+      <div class="card-title">Bank / Mandate Breakdown</div>
+      <div class="card-sub">COMBINED UNITS SPLIT BY BANK (ALL SOURCES)</div>
+      <div class="chart-wrap"><canvas id="t5-bank-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Source Type Distribution</div>
+      <div class="card-sub">EDC vs TRACER vs FTV SHARE</div>
+      <div class="chart-wrap"><canvas id="t5-donut-chart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── INSIGHTS ── -->
+  <div class="sec-label"><i>●</i> Auto-Generated Insights</div>
+  <div class="insight-grid">
+    <div class="chip good"><div class="chip-lbl">Top Ext EDC Source</div><div class="chip-val" id="t5-ins-top-edc">— no data yet</div></div>
+    <div class="chip info"><div class="chip-lbl">Top Tracer Agent</div><div class="chip-val" id="t5-ins-top-tracer">— no data yet</div></div>
+    <div class="chip warn"><div class="chip-lbl">Top FTV Agent</div><div class="chip-val" id="t5-ins-top-ftv">— no data yet</div></div>
+    <div class="chip good"><div class="chip-lbl">EDC · Tracer · FTV Split</div><div class="chip-val" id="t5-ins-split">No data — add records above</div></div>
+  </div>
+</div>
+
+<footer>
+  <span>CRM Recovery Unit &nbsp;|&nbsp; Daily Operations Dashboard</span>
+  <span>Confidential — Internal Use Only &nbsp;|&nbsp; Enterprise Software Solutions (Pty) Ltd</span>
+  <span>Recover With Integrity &nbsp;|&nbsp; The CRM Way: Discipline, Cadence, Outcome</span>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA STORES — single source of truth
+// ══════════════════════════════════════════════════
+let dailyData = [
+  {date:'01 Jun 2026', mq:0, bmw:0, wb:3,  absa:0, std:0, imas:0},
+  {date:'02 Jun 2026', mq:0, bmw:0, wb:10, absa:1, std:0, imas:0},
+  {date:'03 Jun 2026', mq:1, bmw:2, wb:8,  absa:0, std:2, imas:0},
+];
+
+let anprData = []; // populated by migrateAnpr() inside Tab-2 section below
+
+let edcData = [
+  {name:'Albert Mojapelo',    val:1},
+  {name:'Hope Mapitsi',       val:4},
+  {name:'TK Mulwevo',         val:3},
+  {name:'Daniel Moeketi',     val:1},
+  {name:'Sebastian Govender', val:2},
+  {name:'Sandile Buthelezi',  val:3},
+  {name:'Mduduzi Mpanza',     val:1},
+  {name:'Dugene',             val:2},
+  {name:'Thapelo',            val:4},
+  {name:'Tyron Klein',        val:0},
+];
+
+// ══════════════════════════════════════════════════
+// CHARTS registry
+// ══════════════════════════════════════════════════
+const charts = {};
+Chart.defaults.color = 'rgba(255,255,255,0.35)';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.07)';
+Chart.defaults.font.family = "'Share Tech Mono', monospace";
+Chart.defaults.font.size = 10;
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+// ══════════════════════════════════════════════════
+// TAB SWITCHING
+// ══════════════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    setTimeout(initAllCharts, 120);
+  });
+});
+
+// ══════════════════════════════════════════════════
+// PERSISTENCE — DUAL LAYER
+//
+// Layer 1: localStorage — auto-saves on every edit.
+//   Works instantly on the same browser/device.
+//   Survives tab close, refresh, and browser restart.
+//
+// Layer 2: Baked HTML — ↓ SAVE button embeds all data
+//   directly into the downloaded HTML file so that when
+//   it is opened on ANY other PC, tablet, or phone the
+//   exact same data appears without needing a server.
+// ══════════════════════════════════════════════════
+
+const STORAGE_KEY = 'crm_recovery_dashboard_v1';
+
+// Collect all live data into one object
+function collectAllData() {
+  return {
+    dailyData,
+    anprDays,
+    anprData,
+    edcData,
+    extEdcData,
+    tracerData,
+    ftvData,
+    // Capture Tab 4 barometer input values
+    barometer: {
+      target:    document.getElementById('b-target')   ?.value || '200',
+      day:       document.getElementById('b-day')      ?.value || '3',
+      length:    document.getElementById('b-length')   ?.value || '21',
+      recovered: document.getElementById('b-recovered')?.value || '27',
+      bkAbsa:    document.getElementById('bk-absa')   ?.value || '1',
+      bkStd:     document.getElementById('bk-std')    ?.value || '2',
+      bkWb:      document.getElementById('bk-wb')     ?.value || '21',
+      bkBmw:     document.getElementById('bk-bmw')    ?.value || '2',
+      bkImas:    document.getElementById('bk-imas')   ?.value || '0',
+      bkMq:      document.getElementById('bk-mq')     ?.value || '1',
+    },
+    mayVal:     document.getElementById('may-val')?.value || '1',
+    headerDate: document.getElementById('hdr-date-val')?.value || '03 JUN 2026',
+    assignRows: (function() {
+      const rows = [];
+      document.querySelectorAll('#assign-tbody tr').forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        if (inputs.length >= 3) rows.push({ date: inputs[0].value, qty: inputs[1].value, queues: inputs[2].value });
+      });
+      return rows;
+    })(),
+    savedAt: new Date().toISOString()
+  };
+}
+
+// Restore all data arrays and input values from a saved object
+function applyAllData(d) {
+  if (!d) return;
+  if (d.dailyData)  dailyData  = d.dailyData;
+  if (d.anprDays)   anprDays   = d.anprDays;
+  if (d.anprData)   anprData   = d.anprData;
+  if (d.edcData)    edcData    = d.edcData;
+  if (d.extEdcData) extEdcData = d.extEdcData;
+  if (d.tracerData) tracerData = d.tracerData;
+  if (d.ftvData)    ftvData    = d.ftvData;
+  if (d.barometer) {
+    const b = d.barometer;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    set('b-target',    b.target);
+    set('b-day',       b.day);
+    set('b-length',    b.length);
+    set('b-recovered', b.recovered);
+    set('bk-absa',     b.bkAbsa);
+    set('bk-std',      b.bkStd);
+    set('bk-wb',       b.bkWb);
+    set('bk-bmw',      b.bkBmw);
+    set('bk-imas',     b.bkImas);
+    set('bk-mq',       b.bkMq);
+  }
+  if (d.mayVal) {
+    const el = document.getElementById('may-val');
+    if (el) el.value = d.mayVal;
+  }
+  if (d.headerDate) {
+    const el = document.getElementById('hdr-date-val');
+    if (el) el.value = d.headerDate;
+  }
+  if (d.assignRows && d.assignRows.length) {
+    const tb = document.getElementById('assign-tbody');
+    if (tb) {
+      tb.innerHTML = '';
+      d.assignRows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input class="ce" value="${r.date}" style="text-align:left;width:90px;"></td>
+          <td><input class="ce" type="number" value="${r.qty}"></td>
+          <td><input class="ce" type="number" value="${r.queues}"></td>
+          <td><button class="del-btn" onclick="this.closest('tr').remove();autoSave()">✕</button></td>
+        `;
+        tb.appendChild(tr);
+      });
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════
+// CLOUD SYNC — Firebase REST API (zero setup, works everywhere)
+// Uses a shared pre-configured Firebase Realtime Database.
+// No SDK, no login, no config — just open and it syncs.
+// ══════════════════════════════════════════════════
+
+const DB_URL = 'https://crm-dashboard-sync-default-rtdb.europe-west1.firebasedatabase.app/dashboard.json';
+
+function setSyncStatus(state) {
+  const dot  = document.getElementById('autosave-dot');
+  const pill = document.getElementById('sync-status');
+  const lbl  = document.getElementById('sync-label');
+  const colors = { saving:'#f0a500', saved:'#00e5a0', loading:'#4488ff', error:'#ff3350', idle:'rgba(255,255,255,0.12)' };
+  const labels = { saving:'SAVING…', saved:'SYNCED ☁', loading:'LOADING…', error:'LOCAL ONLY', idle:'SYNC' };
+  if (dot)  { dot.style.background = colors[state]; dot.style.boxShadow = state==='idle'?'none':'0 0 8px '+colors[state]; }
+  if (pill) { pill.style.borderColor = state==='idle' ? '' : colors[state]; }
+  if (lbl)  lbl.textContent = labels[state];
+  if (state === 'saved') {
+    clearTimeout(dot && dot._t);
+    if (dot) dot._t = setTimeout(() => setSyncStatus('idle'), 4000);
+  }
+}
+
+async function cloudSave(data) {
+  try {
+    const res = await fetch(DB_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error('Firebase save failed:', res.status, txt);
+    }
+    return res.ok;
+  } catch(e) {
+    console.error('Firebase save error:', e);
+    return false;
+  }
+}
+
+async function cloudLoad() {
+  try {
+    const res = await fetch(DB_URL);
+    if (!res.ok) {
+      console.error('Firebase load failed:', res.status, await res.text());
+      return null;
+    }
+    const data = await res.json();
+    console.log('Firebase loaded:', data ? 'data found' : 'empty');
+    return (data && typeof data === 'object' && !data.cleared) ? data : null;
+  } catch(e) {
+    console.error('Firebase load error:', e);
+    return null;
+  }
+}
+
+// MANUAL FORCE SAVE — call this from console: forceSave()
+async function forceSave() {
+  const data = collectAllData();
+  setSyncStatus('saving');
+  const ok = await cloudSave(data);
+  setSyncStatus(ok ? 'saved' : 'error');
+  alert(ok ? '✓ Saved to cloud successfully!' : '✗ Save failed — check browser console (F12) for details.');
+  return ok;
+}
+
+// AUTO-SAVE — fires 400ms after last change + immediate save on page close
+let autoSaveTimer = null;
+function autoSave() {
+  clearTimeout(autoSaveTimer);
+  // Immediate local save
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(collectAllData())); } catch(e) {}
+  // Cloud save after short debounce
+  autoSaveTimer = setTimeout(async () => {
+    const data = collectAllData();
+    setSyncStatus('saving');
+    const ok = await cloudSave(data);
+    setSyncStatus(ok ? 'saved' : 'error');
+  }, 400);
+}
+
+// Safety net: force-save to cloud when user closes/navigates away
+window.addEventListener('beforeunload', () => {
+  const data = collectAllData();
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  // Use sendBeacon for reliable fire-and-forget on page close
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  navigator.sendBeacon(DB_URL.replace('.json', '.json?x-http-method-override=PUT'), blob);
+});
+
+// LOAD on startup — always cloud first (never localStorage when cloud available)
+async function loadPersistedData() {
+  setSyncStatus('loading');
+  const cloudData = await cloudLoad();
+  if (cloudData) {
+    applyAllData(cloudData);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData)); } catch(e) {}
+    setSyncStatus('saved');
+    recalcAll();
+    return;
+  }
+  // Cloud unavailable — fall back to localStorage
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { applyAllData(JSON.parse(raw)); recalcAll(); setSyncStatus('error'); return; }
+  } catch(e) {}
+  if (window.__savedData) { applyAllData(window.__savedData); recalcAll(); }
+  setSyncStatus('idle');
+}
+
+
+// ── SAVE PAGE — bakes ALL data into the downloaded HTML
+//   The downloaded file is self-contained and works on any PC/phone/tablet
+function savePage() {
+  const payload = collectAllData();
+  const dataScript = `<script id="persisted-data">window.__savedData=${JSON.stringify(payload)};<\/script>`;
+
+  let html = document.documentElement.outerHTML;
+  // Remove any previously baked data block
+  html = html.replace(/<script id="persisted-data">[\s\S]*?<\/script>/g, '');
+  // Inject right after <head>
+  html = html.replace('<head>', '<head>' + dataScript);
+
+  const blob = new Blob(['<!DOCTYPE html>' + html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'CRM_Recovery_Dashboard_' + new Date().toISOString().slice(0,10) + '.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  // Also keep localStorage in sync
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch(e) {}
+
+  const b = document.getElementById('save-banner');
+  b.style.background = '';
+  b.style.borderColor = '';
+  b.style.color = '';
+  b.textContent = '✓  File saved — share or open this HTML on any device to see your data.';
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 5000);
+}
+
+// ══════════════════════════════════════════════════
+// MASTER CLEAR — resets all data for a new month
+// ══════════════════════════════════════════════════
+function showMasterClearModal() {
+  document.getElementById('clear-modal').style.display = 'flex';
+}
+function hideMasterClearModal() {
+  document.getElementById('clear-modal').style.display = 'none';
+}
+function masterClear() {
+  // Reset all data arrays to blank state
+  dailyData  = [];
+  anprDays   = [];
+  anprData.forEach(r => { r.days = []; });
+  // Keep agents but zero all days
+  anprData   = anprData.map(r => ({...r, days:[]}));
+  edcData    = edcData.map(r => ({...r, val:0}));
+  extEdcData = [];
+  tracerData = [];
+  ftvData    = [];
+
+  // Reset Tab 4 barometer inputs
+  ['b-target','b-day','b-length','b-recovered'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = id==='b-target'?'200':id==='b-length'?'21':'0';
+  });
+  ['bk-absa','bk-std','bk-wb','bk-bmw','bk-imas','bk-mq'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '0';
+  });
+
+  // Re-render all tables and recalc
+  renderDailyTable();
+  renderAnprTable();
+  renderEdcTable();
+  renderExtEdcTable();
+  renderFtvTable();
+  renderTracerTable();
+  recalcAll();
+  recalcTab2();
+  recalcTab3();
+  recalcTab4();
+  recalcTab5();
+  initAllCharts();
+
+  hideMasterClearModal();
+
+  // Wipe localStorage so old data doesn't re-appear on next open
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  cloudSave({cleared: true, clearedAt: new Date().toISOString()});
+
+  // Flash confirmation
+  const b = document.getElementById('save-banner');
+  b.style.background = 'rgba(255,77,109,0.15)';
+  b.style.borderColor = '#ff4d6d';
+  b.style.color = '#ff4d6d';
+  b.textContent = '✓  All data cleared — dashboard ready for new month.';
+  b.classList.add('show');
+  setTimeout(() => {
+    b.classList.remove('show');
+    b.style.background = '';
+    b.style.borderColor = '';
+    b.style.color = '';
+    b.textContent = '✓  File saved — share or open this HTML on any device to see your data.';
+  }, 4000);
+}
+
+// ══════════════════════════════════════════════════
+// TAB 1 — RENDER & RECALC
+// ══════════════════════════════════════════════════
+
+// KEY FIX: read values from DOM back into data arrays before recalculating.
+// This syncs any in-place edits that happened without triggering oninput.
+function syncDailyFromDOM() {
+  const tbody = document.getElementById('daily-tbody');
+  const rows = tbody.querySelectorAll('tr');
+  rows.forEach((tr, i) => {
+    if (!dailyData[i]) return;
+    const inputs = tr.querySelectorAll('input');
+    // inputs: [date, mq, bmw, wb, absa, std, imas]
+    if (inputs[0]) dailyData[i].date = inputs[0].value;
+    if (inputs[1]) dailyData[i].mq   = +inputs[1].value || 0;
+    if (inputs[2]) dailyData[i].bmw  = +inputs[2].value || 0;
+    if (inputs[3]) dailyData[i].wb   = +inputs[3].value || 0;
+    if (inputs[4]) dailyData[i].absa = +inputs[4].value || 0;
+    if (inputs[5]) dailyData[i].std  = +inputs[5].value || 0;
+    if (inputs[6]) dailyData[i].imas = +inputs[6].value || 0;
+  });
+}
+
+function renderDailyTable() {
+  const tbody = document.getElementById('daily-tbody');
+  tbody.innerHTML = '';
+  let running = 0;
+  dailyData.forEach((row, i) => {
+    const total = row.mq + row.bmw + row.wb + row.absa + row.std + row.imas;
+    running += total;
+    const tr = document.createElement('tr');
+    tr.dataset.idx = i;
+    tr.innerHTML = `
+      <td><input class="ce" data-field="date" value="${row.date}" style="text-align:left;width:90px;"></td>
+      <td style="color:var(--accent);font-weight:700;" class="row-total">${total}</td>
+      <td><input class="ce" data-field="mq"   type="number" value="${row.mq}"></td>
+      <td><input class="ce" data-field="bmw"  type="number" value="${row.bmw}"></td>
+      <td><input class="ce" data-field="wb"   type="number" value="${row.wb}"></td>
+      <td><input class="ce" data-field="absa" type="number" value="${row.absa}"></td>
+      <td><input class="ce" data-field="std"  type="number" value="${row.std}"></td>
+      <td><input class="ce" data-field="imas" type="number" value="${row.imas}"></td>
+      <td class="mtd-run">${running}</td>
+      <td><button class="del-btn" data-del-daily="${i}">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Event delegation on the tbody — works for ALL rows including new ones
+document.getElementById('daily-tbody').addEventListener('input', function(e) {
+  const input = e.target;
+  if (!input.classList.contains('ce')) return;
+  const tr = input.closest('tr');
+  if (!tr) return;
+  const idx = +tr.dataset.idx;
+  const field = input.dataset.field;
+  if (field && dailyData[idx] !== undefined) {
+    dailyData[idx][field] = field === 'date' ? input.value : (+input.value || 0);
+  }
+  recalcAll();
+});
+
+document.getElementById('daily-tbody').addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-del-daily]');
+  if (!btn) return;
+  const idx = +btn.dataset.delDaily;
+  dailyData.splice(idx, 1);
+  renderDailyTable();
+  recalcAll();
+});
+
+function addDailyRow() {
+  dailyData.push({date:'New Date', mq:0, bmw:0, wb:0, absa:0, std:0, imas:0});
+  renderDailyTable();
+  recalcAll();
+}
+
+function addAssignRow() {
+  const tb = document.getElementById('assign-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="ce" value="New Date" style="text-align:left;width:90px;"></td>
+    <td><input class="ce" type="number" value="0"></td>
+    <td><input class="ce" type="number" value="0"></td>
+    <td><button class="del-btn" onclick="this.closest('tr').remove();autoSave()">✕</button></td>
+  `;
+  tb.appendChild(tr);
+  autoSave();
+}
+
+document.getElementById('assign-tbody').addEventListener('input', () => autoSave());
+
+function calcDailyTotals() {
+  const t = {total:0, mq:0, bmw:0, wb:0, absa:0, std:0, imas:0};
+  dailyData.forEach(r => {
+    t.mq+=r.mq; t.bmw+=r.bmw; t.wb+=r.wb;
+    t.absa+=r.absa; t.std+=r.std; t.imas+=r.imas;
+  });
+  t.total = t.mq+t.bmw+t.wb+t.absa+t.std+t.imas;
+  return t;
+}
+
+function updateDailyFooter(t) {
+  document.getElementById('ft-total').textContent = t.total;
+  document.getElementById('ft-mq').textContent    = t.mq;
+  document.getElementById('ft-bmw').textContent   = t.bmw;
+  document.getElementById('ft-wb').textContent    = t.wb;
+  document.getElementById('ft-absa').textContent  = t.absa;
+  document.getElementById('ft-std').textContent   = t.std;
+  document.getElementById('ft-imas').textContent  = t.imas;
+  document.getElementById('ft-mtd').textContent   = t.total;
+}
+
+// Refresh row-totals and MTD running without full re-render (preserves focus)
+function refreshDailyRowTotals() {
+  const tbody = document.getElementById('daily-tbody');
+  const rows = tbody.querySelectorAll('tr');
+  let running = 0;
+  rows.forEach((tr, i) => {
+    if (!dailyData[i]) return;
+    const r = dailyData[i];
+    const total = r.mq+r.bmw+r.wb+r.absa+r.std+r.imas;
+    running += total;
+    const rowTotalEl = tr.querySelector('.row-total');
+    const mtdEl = tr.querySelector('.mtd-run');
+    if (rowTotalEl) rowTotalEl.textContent = total;
+    if (mtdEl) mtdEl.textContent = running;
+  });
+}
+
+function recalcAll() {
+  const totals = calcDailyTotals();
+  const units  = totals.total;
+  const target = +document.getElementById('k-target').value || 200;
+  const days   = dailyData.length || 1;
+  const dLeft  = 21 - days;
+  const remaining  = target - units;
+  const dailyAvg   = (units / days).toFixed(2);
+  const dailyReq   = dLeft > 0 ? (remaining / dLeft).toFixed(2) : '0.00';
+  const peakDay    = dailyData.reduce((p, r) => {
+    const t = r.mq+r.bmw+r.wb+r.absa+r.std+r.imas; return t > p ? t : p;
+  }, 0);
+
+  // Sync MTD input display
+  document.getElementById('k-units-mtd').value = units;
+
+  document.getElementById('k-daily-avg').textContent  = dailyAvg;
+  document.getElementById('k-outstanding').textContent = Math.max(0, remaining);
+  document.getElementById('k-daily-req').textContent  = dailyReq;
+  document.getElementById('k-peak').textContent       = peakDay;
+
+  updateDailyFooter(totals);
+  refreshDailyRowTotals();
+
+  // MoM — derive current month label from header date, day count from dailyData rows
+  const may = +document.getElementById('may-val').value || 1;
+  const pct = may > 0 ? Math.round(((units - may) / may) * 100) : 0;
+  document.getElementById('jun-val-disp').textContent  = units;
+  document.getElementById('mom-growth').textContent    = (pct>=0?'▲ +':'▼ ')+pct.toLocaleString()+'%';
+  document.getElementById('ins-mom').textContent       = `${pct>=0?'+':''}${pct.toLocaleString()}% — ${units} vs ${may} unit(s) at same stage`;
+
+  // Dynamic month labels — parse header date to get "MMM YYYY", then derive prior month
+  (function updateMomLabels() {
+    const raw   = (document.getElementById('hdr-date-val')?.value || '').trim().toUpperCase();
+    const day   = dailyData.length;
+
+    // Try to extract month abbreviation and year from the date string
+    // Handles formats like "03 JUN 2026", "3 JUNE 2026", "JUN 2026", "2026-06-03" etc.
+    const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const fullMonths = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+
+    let currMonthIdx = -1;
+    let year = '';
+
+    // Match year
+    const yearMatch = raw.match(/\b(20\d\d)\b/);
+    if (yearMatch) year = yearMatch[1];
+
+    // Match month name (short or long)
+    for (let i = 0; i < 12; i++) {
+      if (raw.includes(months[i]) || raw.includes(fullMonths[i])) {
+        currMonthIdx = i; break;
+      }
+    }
+
+    // Fallback: try numeric month from ISO or DD/MM/YYYY
+    if (currMonthIdx === -1) {
+      const isoMatch = raw.match(/(\d{4})-(\d{2})-(\d{2})/);
+      if (isoMatch) currMonthIdx = parseInt(isoMatch[2], 10) - 1;
+      const dmyMatch = raw.match(/\b\d{1,2}[\/\-](\d{1,2})[\/\-](\d{2,4})\b/);
+      if (dmyMatch) currMonthIdx = parseInt(dmyMatch[1], 10) - 1;
+    }
+
+    let currLabel = currMonthIdx >= 0 ? months[currMonthIdx] + (year ? ' ' + year : '') : 'CURRENT MONTH';
+    const prevMonthIdx = currMonthIdx >= 0 ? (currMonthIdx + 11) % 12 : -1;
+    const prevYear = currMonthIdx === 0 && year ? String(+year - 1) : year;
+    let prevLabel = prevMonthIdx >= 0 ? months[prevMonthIdx] + (prevYear ? ' ' + prevYear : '') : 'PRIOR MONTH';
+
+    document.getElementById('mom-prev-lbl').textContent = prevLabel;
+    document.getElementById('mom-curr-lbl').textContent = currLabel;
+  })();
+
+  // Insights
+  const expected = Math.round(target * (days / 21));
+  const variance = units - expected;
+  document.getElementById('ins-pace').textContent = `${variance>=0?'+':''}${variance} units vs pace · Need ${dailyReq}/day · Avg ${dailyAvg}`;
+  const top = Object.entries({Wesbank:totals.wb,BMW:totals.bmw,ABSA:totals.absa,STDBank:totals.std,IMAS:totals.imas,MQ:totals.mq}).sort((a,b)=>b[1]-a[1])[0];
+  const topPct = units > 0 ? (top[1]/units*100).toFixed(1) : 0;
+  document.getElementById('ins-top-mandate').textContent = `${top[0]} dominant — ${top[1]} units (${topPct}% of total)`;
+  document.getElementById('ins-peak').textContent = `Best day: ${peakDay} recoveries`;
+
+  updatePortfolioChart(totals);
+  updateTrendChart();
+  autoSave();
+}
+
+// ══════════════════════════════════════════════════
+// TAB 2 — ANPR  (fully dynamic days)
+// anprDays  = ['01 Jun','02 Jun','03 Jun', ...]
+// anprData[i].days = [{scans, hits}, ...]  — one entry per day
+// ══════════════════════════════════════════════════
+
+let anprDays = ['01 Jun 2026','02 Jun 2026','03 Jun 2026'];
+
+// Convert legacy flat fields to new structure on first run
+(function migrateAnpr() {
+  anprData = [
+    {name:'A Mojapelo',        days:[{scans:4961,hits:10},{scans:3267,hits:8},{scans:1043,hits:6}],  note:''},
+    {name:'E Munyai',          days:[{scans:7176,hits:8}, {scans:4448,hits:16},{scans:6339,hits:14}], note:''},
+    {name:'M Mpanza (Protas)', days:[{scans:1464,hits:6}, {scans:931, hits:2}, {scans:545, hits:2}],  note:''},
+    {name:'H Mapiti',          days:[{scans:5355,hits:15},{scans:6312,hits:12},{scans:7640,hits:18}], note:''},
+    {name:'D Moketi',          days:[{scans:4435,hits:7}, {scans:5731,hits:8}, {scans:9174,hits:11}], note:''},
+    {name:'Thapelo Phewane',   days:[{scans:1745,hits:4}, {scans:1055,hits:1}, {scans:2286,hits:1}],  note:''},
+    {name:'S Butelizi',        days:[{scans:7092,hits:11},{scans:4138,hits:8}, {scans:9421,hits:14}], note:''},
+    {name:'S Govender',        days:[{scans:4064,hits:9}, {scans:5731,hits:5}, {scans:6677,hits:4}],  note:''},
+    {name:'E Mmatladi',        days:[{scans:3973,hits:6}, {scans:1841,hits:0}, {scans:3276,hits:4}],  note:''},
+    {name:'Tyron Klein',       days:[{scans:2749,hits:8}, {scans:4115,hits:5}, {scans:0,   hits:0}],  note:'Vehicle issues'},
+    {name:'Vacant',            days:[{scans:0,   hits:0}, {scans:0,   hits:0}, {scans:0,   hits:0}],  note:'Process Started — Jaco Barnard (Limpopo)'},
+  ];
+})();
+
+// ── Rebuild the entire table from scratch (header + body + footer)
+function renderAnprTable() {
+  const thead = document.getElementById('anpr-thead');
+  const tbody = document.getElementById('anpr-tbody');
+  const tfoot = document.getElementById('anpr-tfoot');
+  const numDays = anprDays.length;
+
+  // ── HEADER ──
+  let hRow = '<tr><th style="text-align:left;min-width:120px;">Agent</th>';
+  anprDays.forEach((d, di) => {
+    hRow += `<th title="Scans on ${d}" style="white-space:nowrap;">${d}</th>`;
+    hRow += `<th style="color:var(--accent2);white-space:nowrap;">+Hits</th>`;
+  });
+  hRow += '<th>Total Scans</th><th style="color:var(--accent2)">Total Hits</th>';
+  hRow += '<th style="min-width:80px;">Notes</th>';
+  hRow += `<th><button class="ctrl-btn" onclick="addAnprDay()" style="font-size:9px;padding:3px 8px;white-space:nowrap;">+Day</button></th></tr>`;
+  thead.innerHTML = hRow;
+
+  // ── BODY ──
+  tbody.innerHTML = '';
+  anprData.forEach((r, i) => {
+    const totalScans = r.days.reduce((s,d)=>s+d.scans,0);
+    const totalHits  = r.days.reduce((s,d)=>s+d.hits, 0);
+    const tr = document.createElement('tr');
+    tr.dataset.idx = i;
+
+    let cells = `<td><input class="ce" data-field="name" value="${r.name}" style="text-align:left;width:110px;"></td>`;
+    r.days.forEach((d, di) => {
+      cells += `<td><input class="ce" data-dtype="scans" data-day="${di}" type="number" value="${d.scans}"></td>`;
+      cells += `<td><input class="ce" data-dtype="hits"  data-day="${di}" type="number" value="${d.hits}"  style="color:var(--accent2)"></td>`;
+    });
+    cells += `<td class="anpr-row-scan-total" style="color:var(--text);font-weight:600;">${totalScans.toLocaleString()}</td>`;
+    cells += `<td class="anpr-row-hit-total"  style="color:var(--accent2);font-weight:600;">${totalHits}</td>`;
+    cells += `<td><input class="ce" data-field="note" value="${r.note}" style="text-align:left;width:120px;color:${r.note?'var(--accent4)':'var(--muted)'};"></td>`;
+    cells += `<td><button class="del-btn" data-del-anpr="${i}">✕</button></td>`;
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+  });
+
+  // ── FOOTER ──
+  let fRow = '<tr><td>TOTALS</td>';
+  anprDays.forEach((d, di) => {
+    const scanSum = anprData.reduce((s,r)=>s+r.days[di].scans,0);
+    const hitSum  = anprData.reduce((s,r)=>s+r.days[di].hits, 0);
+    fRow += `<td id="af-s${di}" style="color:var(--accent)">${scanSum.toLocaleString()}</td>`;
+    fRow += `<td id="af-h${di}" style="color:var(--accent2)">${hitSum}</td>`;
+  });
+  const grandScans = anprData.reduce((s,r)=>s+r.days.reduce((a,d)=>a+d.scans,0),0);
+  const grandHits  = anprData.reduce((s,r)=>s+r.days.reduce((a,d)=>a+d.hits, 0),0);
+  fRow += `<td id="af-tot-scans" style="color:var(--accent)">${grandScans.toLocaleString()}</td>`;
+  fRow += `<td id="af-tot-hits"  style="color:var(--accent2)">${grandHits}</td>`;
+  fRow += '<td></td><td></td></tr>';
+  tfoot.innerHTML = fRow;
+
+  recalcTab2();
+}
+
+// ── Event delegation — handles all body inputs for ALL rows+days
+document.getElementById('anpr-tbody').addEventListener('input', function(e) {
+  const inp = e.target;
+  if (!inp.classList.contains('ce')) return;
+  const tr  = inp.closest('tr');
+  const idx = +tr.dataset.idx;
+  const r   = anprData[idx];
+  if (!r) return;
+
+  if (inp.dataset.field === 'name') {
+    r.name = inp.value;
+  } else if (inp.dataset.field === 'note') {
+    r.note = inp.value;
+  } else if (inp.dataset.dtype) {
+    const di  = +inp.dataset.day;
+    const val = +inp.value || 0;
+    if (inp.dataset.dtype === 'scans') r.days[di].scans = val;
+    else                               r.days[di].hits  = val;
+    // Update row totals immediately (no full re-render)
+    const scanTot = r.days.reduce((s,d)=>s+d.scans,0);
+    const hitTot  = r.days.reduce((s,d)=>s+d.hits, 0);
+    const rstEl = tr.querySelector('.anpr-row-scan-total');
+    const rhtEl = tr.querySelector('.anpr-row-hit-total');
+    if (rstEl) rstEl.textContent = scanTot.toLocaleString();
+    if (rhtEl) rhtEl.textContent = hitTot;
+  }
+  recalcTab2();
+});
+
+document.getElementById('anpr-tbody').addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-del-anpr]');
+  if (!btn) return;
+  anprData.splice(+btn.dataset.delAnpr, 1);
+  renderAnprTable();
+});
+
+// ── Add a new blank agent row (with slots for all current days)
+function addAnprRow() {
+  const blanks = anprDays.map(()=>({scans:0,hits:0}));
+  anprData.push({name:'New Agent', days:blanks, note:''});
+  // Full re-render so all data-idx values are correct for the new row count
+  renderAnprTable();
+  // Scroll new row into view and focus name field
+  const tbody = document.getElementById('anpr-tbody');
+  const lastRow = tbody.lastElementChild;
+  if (lastRow) {
+    lastRow.scrollIntoView({behavior:'smooth', block:'center'});
+    const nameInput = lastRow.querySelector('input');
+    if (nameInput) { nameInput.focus(); nameInput.select(); }
+  }
+}
+
+// ── Add a new day column (prompts for label, appends to all agents)
+function addAnprDay() {
+  const label = prompt('Enter day label (e.g. 04 Jun 2026):', `0${anprDays.length+1} Jun 2026`) || `Day ${anprDays.length+1}`;
+  anprDays.push(label);
+  anprData.forEach(r => r.days.push({scans:0, hits:0}));
+  renderAnprTable();
+}
+
+// ── Recalc KPIs, footer, charts (does NOT re-render rows)
+function recalcTab2() {
+  const numDays = anprDays.length;
+  const tfoot = document.getElementById('anpr-tfoot');
+
+  // Rebuild footer row completely (guarantees IDs always exist and match current day count)
+  let fRow = '<tr><td>TOTALS</td>';
+  let grandScans = 0, grandHits = 0;
+  anprDays.forEach((d, di) => {
+    const scanSum = anprData.reduce((s,r)=>s+(r.days[di]?.scans||0),0);
+    const hitSum  = anprData.reduce((s,r)=>s+(r.days[di]?.hits ||0),0);
+    grandScans += scanSum;
+    grandHits  += hitSum;
+    fRow += `<td style="color:var(--accent)">${scanSum.toLocaleString()}</td>`;
+    fRow += `<td style="color:var(--accent2)">${hitSum}</td>`;
+  });
+  fRow += `<td style="color:var(--accent)">${grandScans.toLocaleString()}</td>`;
+  fRow += `<td style="color:var(--accent2)">${grandHits}</td>`;
+  fRow += '<td></td><td></td></tr>';
+  if (tfoot) tfoot.innerHTML = fRow;
+
+  // Also update row-level scan/hit totals in tbody
+  const tbody = document.getElementById('anpr-tbody');
+  if (tbody) {
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const idx = +tr.dataset.idx;
+      if (!anprData[idx]) return;
+      const r = anprData[idx];
+      const scanTot = r.days.reduce((s,d)=>s+d.scans,0);
+      const hitTot  = r.days.reduce((s,d)=>s+d.hits, 0);
+      const rstEl = tr.querySelector('.anpr-row-scan-total');
+      const rhtEl = tr.querySelector('.anpr-row-hit-total');
+      if (rstEl) rstEl.textContent = scanTot.toLocaleString();
+      if (rhtEl) rhtEl.textContent = hitTot;
+    });
+  }
+
+  // KPI cards
+  document.getElementById('anpr-mtd-disp').textContent  = grandScans.toLocaleString();
+  document.getElementById('anpr-avg-disp').textContent  = numDays > 0 ? Math.round(grandScans/numDays).toLocaleString() : '0';
+  document.getElementById('anpr-hits-disp').textContent = grandHits;
+
+  renderAgentRank();
+  updateScanTrendChart();
+  updateHitsPerDayChart();
+  autoSave();
+}
+
+function renderAgentRank() {
+  const list = document.getElementById('agent-rank-list');
+  if (!list) return;
+  const ranked = anprData
+    .map(r => ({name:r.name, hits:r.days.reduce((s,d)=>s+d.hits,0)}))
+    .sort((a,b) => b.hits-a.hits).slice(0,10);
+  const max = ranked[0]?.hits || 1;
+  list.innerHTML = ranked.map(a => `
+    <div class="agent-row">
+      <div class="agent-av">${a.name[0]}</div>
+      <div class="agent-name">${a.name}</div>
+      <div class="agent-bar-wrap"><div class="agent-bar" style="width:${(a.hits/max*100).toFixed(0)}%"></div></div>
+      <div class="agent-hits">${a.hits}</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════
+// TAB 3 — EDC
+// ══════════════════════════════════════════════════
+
+function renderEdcTable() {
+  const tbody = document.getElementById('edc-tbody');
+  tbody.innerHTML = '';
+  const total = edcData.reduce((s,r) => s+r.val, 0);
+  edcData.forEach((r, i) => {
+    const pct = total > 0 ? (r.val/total*100).toFixed(1) : '0.0';
+    const tr = document.createElement('tr');
+    tr.dataset.idx = i;
+    tr.innerHTML = `
+      <td><input class="ce" data-field="name" value="${r.name}" style="text-align:left;width:150px;"></td>
+      <td><input class="ce" data-field="val"  type="number" value="${r.val}" style="color:${r.val>0?'var(--accent2)':'var(--border2)'}"></td>
+      <td class="edc-pct-cell">${pct}%</td>
+      <td><button class="del-btn" data-del-edc="${i}">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('edc-total-ft').textContent = total;
+}
+
+document.getElementById('edc-tbody').addEventListener('input', function(e) {
+  const input = e.target;
+  if (!input.classList.contains('ce')) return;
+  const tr = input.closest('tr');
+  const idx = +tr.dataset.idx;
+  const field = input.dataset.field;
+  if (field && edcData[idx] !== undefined) {
+    edcData[idx][field] = field === 'name' ? input.value : (+input.value || 0);
+  }
+  recalcTab3();
+});
+
+document.getElementById('edc-tbody').addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-del-edc]');
+  if (!btn) return;
+  edcData.splice(+btn.dataset.delEdc, 1);
+  renderEdcTable();
+  recalcTab3();
+});
+
+function addEdcRow() {
+  edcData.push({name:'New Agent', val:0});
+  renderEdcTable();
+  recalcTab3();
+}
+
+function recalcTab3() {
+  // Refresh share % column without full re-render
+  const total = edcData.reduce((s,r) => s+r.val, 0);
+  document.getElementById('edc-total-ft').textContent = total;
+  document.querySelectorAll('#edc-tbody tr').forEach((tr, i) => {
+    const pctCell = tr.querySelector('.edc-pct-cell');
+    if (pctCell && edcData[i]) {
+      const pct = total > 0 ? (edcData[i].val/total*100).toFixed(1) : '0.0';
+      pctCell.textContent = pct + '%';
+    }
+  });
+
+  updateEdcChart();
+  renderEdcLeaderboard();
+
+  const sorted = [...edcData].sort((a,b) => b.val-a.val);
+  const topVal = sorted[0]?.val || 0;
+  const tops = sorted.filter(r => r.val === topVal).map(r => r.name).join(' & ');
+  const zeros = edcData.filter(r => r.val === 0).map(r => r.name).join(', ');
+  document.getElementById('edc-top').textContent = `${tops} — ${topVal} upliftments each (MTD)`;
+  document.getElementById('edc-zero').textContent = zeros ? `${zeros} — 0 upliftments` : 'All agents active';
+  document.getElementById('edc-total-ins').textContent = `${total} total upliftments across ${edcData.filter(r=>r.val>0).length} active agents`;
+  autoSave();
+}
+
+function renderEdcLeaderboard() {
+  const lb = document.getElementById('edc-leaderboard');
+  if (!lb) return;
+  const sorted = [...edcData].sort((a,b) => b.val-a.val);
+  const max = sorted[0]?.val || 1;
+  lb.innerHTML = sorted.map((r,i) => `
+    <div class="agent-row">
+      <div class="agent-av" style="font-size:11px;color:${i===0?'var(--accent3)':'var(--accent)'}">${i+1}</div>
+      <div class="agent-name">${r.name}</div>
+      <div class="agent-bar-wrap" style="width:90px;"><div class="agent-bar" style="width:${(r.val/max*100).toFixed(0)}%;background:${r.val===0?'var(--border)':i===0?'var(--accent3)':'var(--accent2)'}"></div></div>
+      <div class="agent-hits" style="color:${r.val===0?'var(--muted)':i===0?'var(--accent3)':'var(--accent2)'}">${r.val}</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════
+// TAB 4 — BAROMETER
+// ══════════════════════════════════════════════════
+function recalcTab4() {
+  const target = +document.getElementById('b-target').value || 200;
+  const day    = +document.getElementById('b-day').value    || 3;
+  const len    = +document.getElementById('b-length').value || 21;
+  const rec    = +document.getElementById('b-recovered').value || 27;
+
+  const ach     = (rec/target*100).toFixed(1);
+  const out     = target - rec;
+  const dLeft   = len - day;
+  const rr      = dLeft > 0 ? (out/dLeft).toFixed(1) : '0.0';
+  const expected= Math.round(target*(day/len));
+  const variance= rec - expected;
+
+  document.getElementById('b-ach').textContent = ach+'%';
+  document.getElementById('b-out').textContent = out;
+  document.getElementById('b-rr').textContent  = rr;
+  const varEl = document.getElementById('b-var');
+  varEl.textContent   = (variance>=0?'+':'')+variance;
+  varEl.style.color   = variance>=0?'var(--accent2)':'var(--accent4)';
+
+  const pct = Math.min(100, +ach);
+  document.getElementById('thermo-fill').style.height = pct+'%';
+  document.getElementById('thermo-pct').textContent   = ach+'%';
+
+  const pill = document.getElementById('pace-pill');
+  if (variance >= -2) {
+    pill.textContent='● ON PACE'; pill.style.background='rgba(0,229,160,.12)';
+    pill.style.borderColor='var(--accent2)'; pill.style.color='var(--accent2)';
+  } else {
+    pill.textContent='⚠ BEHIND PACE'; pill.style.background='rgba(255,77,109,.12)';
+    pill.style.borderColor='var(--accent4)'; pill.style.color='var(--accent4)';
+  }
+
+  const wb = +document.getElementById('bk-wb').value || 0;
+  document.getElementById('thermo-label').textContent = `${rec} units · ${wb>0?'Wesbank leads':'Multiple leads'}`;
+  document.getElementById('thermo-sub').innerHTML = `Variance: ${variance>=0?'+':''}${variance} units<br>Required: ${rr}/day`;
+
+  renderMandateBars();
+  updateMandateChart();
+  autoSave();
+
+}
+
+function renderMandateBars() {
+  const container = document.getElementById('mandate-bars');
+  if (!container) return;
+  const banks = [
+    {id:'bk-wb',   name:'WESBANK',  hex:'#0070d8'},
+    {id:'bk-std',  name:'STD BANK', hex:'#1a3c8f'},
+    {id:'bk-bmw',  name:'BMW FS',   hex:'#48a8ff'},
+    {id:'bk-absa', name:'ABSA',     hex:'#cc2233'},
+    {id:'bk-mq',   name:'MARQUIS',  hex:'#00aa55'},
+    {id:'bk-imas', name:'IMAS',     hex:'#8855cc'},
+  ];
+  const vals = banks.map(b => ({...b, val:+(document.getElementById(b.id)?.value||0)}));
+  const total = vals.reduce((s,b) => s+b.val, 0) || 1;
+  const sorted = [...vals].sort((a,b) => b.val-a.val);
+  container.innerHTML = sorted.map((b,i) => `
+    <div class="m-row">
+      <div class="m-rank">${i+1}</div>
+      <div class="m-name" style="color:${b.hex}">${b.name}</div>
+      <div class="m-bar-wrap"><div class="m-bar" style="width:${(b.val/total*100).toFixed(1)}%;background:${b.hex}"></div></div>
+      <div class="m-count" style="color:${b.hex}">${b.val}</div>
+      <div class="m-pct">${(b.val/total*100).toFixed(1)}%</div>
+    </div>
+  `).join('');
+}
+
+
+// ══════════════════════════════════════════════════
+// CHARTS
+// ══════════════════════════════════════════════════
+function updatePortfolioChart(totals) {
+  destroyChart('portfolio');
+  const el = document.getElementById('portfolioChart');
+  if (!el) return;
+  const t = totals || calcDailyTotals();
+  charts.portfolio = new Chart(el, {
+    type: 'doughnut',
+    data: {
+      labels: ['Wesbank','BMW','ABSA','STD Bank','IMAS','MQ'],
+      datasets: [{
+        data: [t.wb, t.bmw, t.absa, t.std, t.imas, t.mq],
+        backgroundColor: ['#0070d8','#48a8ff','#cc2233','#1a3c8f','#8855cc','#dd7700'],
+        borderWidth: 2, borderColor: '#060606', hoverOffset: 6
+      }]
+    },
+    options: {
+      cutout: '62%',
+      plugins: {
+        legend: {position:'right', labels:{boxWidth:10, padding:8, color:'rgba(255,255,255,0.35)', font:{size:9}}},
+        tooltip: {callbacks:{label: c => ` ${c.label}: ${c.raw} units`}}
+      }
+    }
+  });
+}
+
+function updateTrendChart() {
+  destroyChart('trend');
+  const el = document.getElementById('trendChart');
+  if (!el) return;
+  const labels = dailyData.map(r => r.date);
+  const vals   = dailyData.map(r => r.mq+r.bmw+r.wb+r.absa+r.std+r.imas);
+  const maxVal = Math.max(...vals);
+  charts.trend = new Chart(el, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Units Recovered', data: vals,
+        backgroundColor: vals.map(v => v === maxVal ? 'rgba(0,229,160,0.7)' : 'rgba(0,180,255,0.35)'),
+        borderColor:     vals.map(v => v === maxVal ? 'var(--accent2)' : 'var(--accent)'),
+        borderWidth: 1, borderRadius: 4, borderSkipped: false
+      }]
+    },
+    options: {
+      plugins: {legend:{display:false}},
+      scales: {
+        y: {beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.35)', stepSize:1}},
+        x: {grid:{display:false}, ticks:{color:'rgba(255,255,255,0.75)'}}
+      }
+    }
+  });
+}
+
+function updateScanTrendChart() {
+  destroyChart('scanTrend');
+  const el = document.getElementById('scanTrendChart');
+  if (!el) return;
+  const target = +document.getElementById('anpr-target')?.value || 50000;
+  const scansByDay = anprDays.map((d,di) => anprData.reduce((s,r)=>s+(r.days[di]?.scans||0),0));
+  charts.scanTrend = new Chart(el, {
+    type: 'bar',
+    data: {
+      labels: anprDays,
+      datasets: [
+        {label:'Scans', data:scansByDay, backgroundColor:'rgba(0,180,255,0.25)', borderColor:'var(--accent)', borderWidth:1, borderRadius:4, yAxisID:'y'},
+        {type:'line', label:'Target', data:anprDays.map(()=>target), borderColor:'rgba(255,179,64,0.5)', borderDash:[5,5], pointRadius:0, borderWidth:1.5, yAxisID:'y'}
+      ]
+    },
+    options: {
+      plugins:{legend:{labels:{boxWidth:10,color:'rgba(255,255,255,0.35)'}}},
+      scales: {
+        y:{grid:{color:'rgba(255,255,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.35)', callback:v=>v.toLocaleString()}},
+        x:{grid:{display:false}, ticks:{color:'rgba(255,255,255,0.75)', maxRotation:30}}
+      }
+    }
+  });
+}
+
+function updateHitsPerDayChart() {
+  destroyChart('hitsPerDay');
+  const el = document.getElementById('hitsPerDayChart');
+  if (!el) return;
+  const hitsByDay = anprDays.map((d,di) => anprData.reduce((s,r)=>s+(r.days[di]?.hits||0),0));
+  const maxH = Math.max(...hitsByDay, 1);
+  charts.hitsPerDay = new Chart(el, {
+    type: 'bar',
+    data: {
+      labels: anprDays,
+      datasets: [
+        {
+          label:'Positive Hits', data:hitsByDay,
+          backgroundColor: hitsByDay.map(v => v===maxH ? 'rgba(0,229,160,0.6)' : 'rgba(0,229,160,0.2)'),
+          borderColor: hitsByDay.map(v => v===maxH ? 'var(--accent2)' : 'rgba(0,229,160,0.4)'),
+          borderWidth:1, borderRadius:4, borderSkipped:false
+        }
+      ]
+    },
+    options: {
+      plugins:{legend:{display:false}},
+      scales: {
+        y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.35)'}},
+        x:{grid:{display:false}, ticks:{color:'rgba(255,255,255,0.75)', maxRotation:30}}
+      }
+    }
+  });
+}
+
+function updateEdcChart() {
+  destroyChart('edc');
+  const el = document.getElementById('edcBarChart');
+  if (!el) return;
+  const labels = edcData.map(r => r.name.split(' ')[0]);
+  const vals   = edcData.map(r => r.val);
+  const maxVal = Math.max(...vals);
+  charts.edc = new Chart(el, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label:'EDC Upliftments', data:vals,
+        backgroundColor: vals.map(v => v===maxVal&&v>0 ? 'rgba(0,229,160,0.6)' : v===0 ? 'rgba(30,42,66,0.6)' : 'rgba(0,180,255,0.35)'),
+        borderColor:     vals.map(v => v===maxVal&&v>0 ? 'var(--accent2)' : v===0 ? 'var(--border)' : 'var(--accent)'),
+        borderWidth:1, borderRadius:4, borderSkipped:false
+      }]
+    },
+    options: {
+      plugins:{legend:{display:false}},
+      scales: {
+        y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.35)', stepSize:1}},
+        x:{grid:{display:false}, ticks:{color:'rgba(255,255,255,0.75)', maxRotation:35, font:{size:9}}}
+      }
+    }
+  });
+}
+
+function updateMandateChart() {
+  destroyChart('mandate');
+  const el = document.getElementById('mandateChart');
+  if (!el) return;
+  const banks = [
+    {id:'bk-wb',   name:'Wesbank',  color:'#0070d8'},
+    {id:'bk-std',  name:'STD Bank', color:'#1a3c8f'},
+    {id:'bk-bmw',  name:'BMW FS',   color:'#48a8ff'},
+    {id:'bk-absa', name:'ABSA',     color:'#cc2233'},
+    {id:'bk-mq',   name:'Marquis',  color:'#00aa55'},
+    {id:'bk-imas', name:'IMAS',     color:'#8855cc'},
+  ];
+  const data = banks.map(b => +(document.getElementById(b.id)?.value||0));
+  charts.mandate = new Chart(el, {
+    type: 'doughnut',
+    data: {
+      labels: banks.map(b=>b.name),
+      datasets: [{data, backgroundColor:banks.map(b=>b.color), borderWidth:2, borderColor:'#060606', hoverOffset:6}]
+    },
+    options: {
+      cutout:'55%',
+      plugins:{
+        legend:{position:'right', labels:{boxWidth:10, padding:8, color:'rgba(255,255,255,0.35)', font:{size:9}}},
+        tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}`}}
+      }
+    }
+  });
+}
+
+function initAllCharts() {
+  updatePortfolioChart();
+  updateTrendChart();
+  updateScanTrendChart();
+  updateHitsPerDayChart();
+  updateEdcChart();
+  updateMandateChart();
+  updateT5Charts();
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  loadPersistedData();   // ← restores saved arrays if present
+  renderDailyTable();
+  renderAnprTable();
+  renderEdcTable();
+  renderExtEdcTable();
+  renderFtvTable();
+  renderTracerTable();
+  recalcAll();
+  recalcTab2();
+  recalcTab3();
+  recalcTab4();
+  recalcTab5();
+  setTimeout(initAllCharts, 200);
+});
+// ══════════════════════════════════════════════════
+// TAB 5 — EXTERNAL EDC · TRACER · FTV REPOS
+// ══════════════════════════════════════════════════
+
+let extEdcData = [
+  {agent:'External Agent 1', date:'01 Jun 2026', units:2, bank:'Wesbank',  note:''},
+  {agent:'External Agent 2', date:'02 Jun 2026', units:1, bank:'ABSA',     note:''},
+  {agent:'External Agent 3', date:'03 Jun 2026', units:3, bank:'Wesbank',  note:''},
+];
+
+let tracerData = [
+  {agent:'Tracer Agent A', date:'01 Jun 2026', units:1, bank:'STD Bank', note:''},
+  {agent:'Tracer Agent B', date:'02 Jun 2026', units:2, bank:'BMW FS',   note:''},
+  {agent:'Tracer Agent A', date:'03 Jun 2026', units:1, bank:'Wesbank',  note:''},
+];
+
+let ftvData = [
+  {agent:'FTV Agent 1', date:'01 Jun 2026', units:1, bank:'Wesbank',  note:''},
+  {agent:'FTV Agent 2', date:'02 Jun 2026', units:2, bank:'STD Bank', note:''},
+];
+
+// ── Generic table renderer (shared pattern for all 3 tables)
+function renderT5Table(data, tbodyId, delAttr, unitColor) {
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = '';
+  data.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.dataset.idx = i;
+    tr.innerHTML = `
+      <td><input class="ce" data-field="agent" value="${r.agent}" style="text-align:left;width:120px;"></td>
+      <td><input class="ce" data-field="date"  value="${r.date}"  style="text-align:right;width:88px;"></td>
+      <td><input class="ce" data-field="units" type="number" value="${r.units}" style="color:${unitColor}"></td>
+      <td><input class="ce" data-field="bank"  value="${r.bank}"  style="text-align:right;width:76px;color:#ffb340"></td>
+      <td><input class="ce" data-field="note"  value="${r.note}"  style="text-align:left;width:100px;color:#5a7099"></td>
+      <td><button class="del-btn" data-del="${delAttr}:${i}">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderExtEdcTable() { renderT5Table(extEdcData, 'ext-edc-tbody', 'extedc', '#00e5a0'); }
+function renderTracerTable()  { renderT5Table(tracerData,  'tracer-tbody',  'tracer', '#00b4ff'); }
+function renderFtvTable()     { renderT5Table(ftvData,     'ftv-tbody',     'ftv',    '#ffb340'); }
+
+// ── Single delegated input handler factory
+function makeT5InputHandler(dataArr) {
+  return function(e) {
+    const inp = e.target; if (!inp.classList.contains('ce')) return;
+    const idx = +inp.closest('tr').dataset.idx;
+    const field = inp.dataset.field;
+    if (dataArr[idx] !== undefined)
+      dataArr[idx][field] = field==='units' ? (+inp.value||0) : inp.value;
+    recalcTab5();
+  };
+}
+
+// ── Single delegated click handler factory
+function makeT5ClickHandler(dataArr, renderFn) {
+  return function(e) {
+    const btn = e.target.closest('[data-del]');
+    if (!btn) return;
+    const [, idxStr] = btn.dataset.del.split(':');
+    dataArr.splice(+idxStr, 1);
+    renderFn(); recalcTab5();
+  };
+}
+
+// Use live getters so handlers always reference the current arrays (even after loadPersistedData replaces them)
+document.getElementById('ext-edc-tbody').addEventListener('input',  e => makeT5InputHandler(extEdcData)(e));
+document.getElementById('ext-edc-tbody').addEventListener('click',  e => makeT5ClickHandler(extEdcData, renderExtEdcTable)(e));
+document.getElementById('tracer-tbody').addEventListener('input',   e => makeT5InputHandler(tracerData)(e));
+document.getElementById('tracer-tbody').addEventListener('click',   e => makeT5ClickHandler(tracerData, renderTracerTable)(e));
+document.getElementById('ftv-tbody').addEventListener('input',      e => makeT5InputHandler(ftvData)(e));
+document.getElementById('ftv-tbody').addEventListener('click',      e => makeT5ClickHandler(ftvData, renderFtvTable)(e));
+
+function addT5Row(dataArr, renderFn, defaultName) {
+  dataArr.push({agent:defaultName, date:'', units:0, bank:'', note:''});
+  renderFn(); recalcTab5();
+  const tbody = renderFn === renderExtEdcTable ? document.getElementById('ext-edc-tbody')
+              : renderFn === renderTracerTable  ? document.getElementById('tracer-tbody')
+              : document.getElementById('ftv-tbody');
+  const last = tbody.lastElementChild;
+  if (last) { last.scrollIntoView({behavior:'smooth',block:'center'}); last.querySelector('input')?.focus(); }
+}
+
+function addExtEdcRow() { addT5Row(extEdcData, renderExtEdcTable, 'New Agent'); }
+function addTracerRow()  { addT5Row(tracerData,  renderTracerTable,  'New Tracer'); }
+function addFtvRow()     { addT5Row(ftvData,     renderFtvTable,     'New FTV Agent'); }
+
+function recalcTab5() {
+  const edcTotal    = extEdcData.reduce((s,r)=>s+r.units,0);
+  const tracerTotal = tracerData.reduce((s,r)=>s+r.units,0);
+  const ftvTotal    = ftvData.reduce((s,r)=>s+r.units,0);
+  const combined    = edcTotal + tracerTotal + ftvTotal;
+
+  document.getElementById('t5-edc-total').textContent      = edcTotal;
+  document.getElementById('t5-tracer-total').textContent   = tracerTotal;
+  document.getElementById('t5-ftv-total').textContent      = ftvTotal;
+  document.getElementById('t5-combined-total').textContent = combined;
+  document.getElementById('ext-edc-ft').textContent        = edcTotal;
+  document.getElementById('tracer-ft').textContent         = tracerTotal;
+  document.getElementById('ftv-ft').textContent            = ftvTotal;
+
+  // Insights
+  const topEdc    = [...extEdcData].sort((a,b)=>b.units-a.units)[0];
+  const topTracer = [...tracerData].sort((a,b)=>b.units-a.units)[0];
+  const topFtv    = [...ftvData].sort((a,b)=>b.units-a.units)[0];
+  document.getElementById('t5-ins-top-edc').textContent    = topEdc    ? `${topEdc.agent} — ${topEdc.units} units`    : '— no data';
+  document.getElementById('t5-ins-top-tracer').textContent = topTracer ? `${topTracer.agent} — ${topTracer.units} units` : '— no data';
+  document.getElementById('t5-ins-top-ftv').textContent    = topFtv    ? `${topFtv.agent} — ${topFtv.units} units`    : '— no data';
+  document.getElementById('t5-ins-split').textContent      = combined > 0
+    ? `EDC: ${edcTotal} (${(edcTotal/combined*100).toFixed(0)}%) · Tracer: ${tracerTotal} (${(tracerTotal/combined*100).toFixed(0)}%) · FTV: ${ftvTotal} (${(ftvTotal/combined*100).toFixed(0)}%)`
+    : 'No data — add records above';
+
+  updateT5Charts();
+  autoSave();
+}
+
+// ── THEME TOGGLE ──
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-theme');
+  const btn = document.getElementById('theme-toggle');
+  btn.textContent = isLight ? '☽ DARK' : '☀ LIGHT';
+  try { localStorage.setItem('crm-theme', isLight ? 'light' : 'dark'); } catch(e){}
+}
+(function applyStoredTheme() {
+  try {
+    if (localStorage.getItem('crm-theme') === 'light') {
+      document.body.classList.add('light-theme');
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = '☽ DARK';
+    }
+  } catch(e){}
+})();
+
+function updateT5Charts() {
+  const edcT    = extEdcData.reduce((s,r)=>s+r.units,0);
+  const tracerT = tracerData.reduce((s,r)=>s+r.units,0);
+  const ftvT    = ftvData.reduce((s,r)=>s+r.units,0);
+
+  // ── 1. Compare bar: EDC vs Tracer vs FTV vs Combined
+  destroyChart('t5compare');
+  const el1 = document.getElementById('t5-compare-chart');
+  if (el1) {
+    charts.t5compare = new Chart(el1, {
+      type: 'bar',
+      data: {
+        labels: ['Ext EDC','Tracer Repos','FTV Repos','Combined'],
+        datasets: [{
+          label: 'Units',
+          data: [edcT, tracerT, ftvT, edcT+tracerT+ftvT],
+          backgroundColor: ['rgba(0,229,160,0.4)','rgba(0,180,255,0.4)','rgba(255,179,64,0.4)','rgba(255,77,109,0.35)'],
+          borderColor:     ['#00e5a0','#00b4ff','#ffb340','#ff4d6d'],
+          borderWidth:1, borderRadius:4, borderSkipped:false
+        }]
+      },
+      options:{
+        plugins:{legend:{display:false}},
+        scales:{
+          y:{beginAtZero:true,grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'rgba(255,255,255,0.35)',stepSize:1}},
+          x:{grid:{display:false},ticks:{color:'rgba(255,255,255,0.75)'}}
+        }
+      }
+    });
+  }
+
+  // ── 2. Agent contribution horizontal bar (all 3 sources)
+  destroyChart('t5agent');
+  const el2 = document.getElementById('t5-agent-chart');
+  if (el2) {
+    const agentMap = {};
+    // tag each entry with source so we can colour-code
+    extEdcData.forEach(r => { agentMap[r.agent] = (agentMap[r.agent]||{edc:0,tracer:0,ftv:0}); agentMap[r.agent].edc += r.units; });
+    tracerData.forEach(r => { agentMap[r.agent] = (agentMap[r.agent]||{edc:0,tracer:0,ftv:0}); agentMap[r.agent].tracer += r.units; });
+    ftvData.forEach(r    => { agentMap[r.agent] = (agentMap[r.agent]||{edc:0,tracer:0,ftv:0}); agentMap[r.agent].ftv    += r.units; });
+    const sorted = Object.entries(agentMap)
+      .map(([name,v])=>({name, total:v.edc+v.tracer+v.ftv, edc:v.edc, tracer:v.tracer, ftv:v.ftv}))
+      .sort((a,b)=>b.total-a.total);
+    charts.t5agent = new Chart(el2, {
+      type: 'bar',
+      data: {
+        labels: sorted.map(e=>e.name),
+        datasets: [
+          {label:'Ext EDC',  data:sorted.map(e=>e.edc),    backgroundColor:'rgba(0,229,160,0.5)', borderColor:'#00e5a0', borderWidth:1, borderRadius:2},
+          {label:'Tracer',   data:sorted.map(e=>e.tracer),  backgroundColor:'rgba(0,180,255,0.4)', borderColor:'#00b4ff', borderWidth:1, borderRadius:2},
+          {label:'FTV',      data:sorted.map(e=>e.ftv),     backgroundColor:'rgba(255,179,64,0.5)' ,borderColor:'#ffb340', borderWidth:1, borderRadius:2},
+        ]
+      },
+      options:{
+        indexAxis:'y',
+        plugins:{
+          legend:{labels:{boxWidth:10,color:'rgba(255,255,255,0.35)',font:{size:9}}},
+          tooltip:{mode:'index'}
+        },
+        scales:{
+          x:{beginAtZero:true,grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'rgba(255,255,255,0.35)',stepSize:1},stacked:true},
+          y:{grid:{display:false},ticks:{color:'rgba(255,255,255,0.75)',font:{size:10}},stacked:true}
+        }
+      }
+    });
+  }
+
+  // ── 3. Bank breakdown (all 3 sources stacked by type)
+  destroyChart('t5bank');
+  const el3 = document.getElementById('t5-bank-chart');
+  if (el3) {
+    const banks = {};
+    const addToBank = (r, type) => {
+      if (!r.bank) return;
+      banks[r.bank] = banks[r.bank] || {edc:0,tracer:0,ftv:0};
+      banks[r.bank][type] += r.units;
+    };
+    extEdcData.forEach(r=>addToBank(r,'edc'));
+    tracerData.forEach(r=>addToBank(r,'tracer'));
+    ftvData.forEach(r=>addToBank(r,'ftv'));
+    const entries = Object.entries(banks).sort((a,b)=>(b[1].edc+b[1].tracer+b[1].ftv)-(a[1].edc+a[1].tracer+a[1].ftv));
+    charts.t5bank = new Chart(el3, {
+      type:'bar',
+      data:{
+        labels: entries.map(e=>e[0]),
+        datasets:[
+          {label:'Ext EDC', data:entries.map(e=>e[1].edc),    backgroundColor:'rgba(0,229,160,0.45)',borderColor:'#00e5a0',borderWidth:1,borderRadius:2},
+          {label:'Tracer',  data:entries.map(e=>e[1].tracer),  backgroundColor:'rgba(0,180,255,0.35)',borderColor:'#00b4ff',borderWidth:1,borderRadius:2},
+          {label:'FTV',     data:entries.map(e=>e[1].ftv),     backgroundColor:'rgba(255,179,64,0.45)',borderColor:'#ffb340',borderWidth:1,borderRadius:2},
+        ]
+      },
+      options:{
+        plugins:{legend:{labels:{boxWidth:10,color:'rgba(255,255,255,0.35)',font:{size:9}}},tooltip:{mode:'index'}},
+        scales:{
+          y:{beginAtZero:true,grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'rgba(255,255,255,0.35)',stepSize:1},stacked:true},
+          x:{grid:{display:false},ticks:{color:'rgba(255,255,255,0.75)'},stacked:true}
+        }
+      }
+    });
+  }
+
+  // ── 4. Source distribution donut
+  destroyChart('t5donut');
+  const el4 = document.getElementById('t5-donut-chart');
+  if (el4) {
+    charts.t5donut = new Chart(el4, {
+      type:'doughnut',
+      data:{
+        labels:['Ext EDC','Tracer Repos','FTV Repos'],
+        datasets:[{
+          data:[edcT, tracerT, ftvT],
+          backgroundColor:['rgba(0,229,160,0.7)','rgba(0,180,255,0.7)','rgba(255,179,64,0.7)'],
+          borderColor:['#00e5a0','#00b4ff','#ffb340'],
+          borderWidth:2, hoverOffset:6
+        }]
+      },
+      options:{
+        cutout:'60%',
+        plugins:{
+          legend:{position:'bottom',labels:{boxWidth:12,padding:10,color:'rgba(255,255,255,0.35)',font:{size:10}}},
+          tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw} units`}}
+        }
+      }
+    });
+  }
+}
+
+</script>
+</body>
+</html>
