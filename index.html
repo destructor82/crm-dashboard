@@ -1372,8 +1372,7 @@ async function loadPersistedData() {
     applyAllData(cloudData);
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData)); } catch(e) {}
     setSyncStatus('saved');
-    recalcAll();
-    return;
+    return; // DOMContentLoaded will call recalcAll and render functions after this
   }
   // Cloud unavailable — fall back to localStorage
   try {
@@ -2247,8 +2246,8 @@ function initAllCharts() {
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  loadPersistedData();   // ← restores saved arrays if present
+window.addEventListener('DOMContentLoaded', async () => {
+  await loadPersistedData();  // ← wait for cloud data BEFORE rendering
   renderDailyTable();
   renderAnprTable();
   renderEdcTable();
