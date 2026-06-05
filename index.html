@@ -1132,6 +1132,12 @@ let dailyData = [
 
 let anprData = []; // populated by migrateAnpr() inside Tab-2 section below
 
+// Tab 5 arrays — declared here so loadPersistedData() can restore them
+// before DOMContentLoaded renders the tables (fixes cloud-reload regression)
+let extEdcData = [];
+let tracerData = [];
+let ftvData    = [];
+
 let edcData = [
   {name:'Albert Mojapelo',    val:1},
   {name:'Hope Mapitsi',       val:4},
@@ -1551,7 +1557,6 @@ document.getElementById('daily-tbody').addEventListener('click', function(e) {
   dailyData.splice(idx, 1);
   renderDailyTable();
   recalcAll();
-  autoSave();
 });
 
 function addDailyRow() {
@@ -1815,7 +1820,6 @@ document.getElementById('anpr-tbody').addEventListener('click', function(e) {
   if (!btn) return;
   anprData.splice(+btn.dataset.delAnpr, 1);
   renderAnprTable();
-  autoSave();
 });
 
 // ── Add a new blank agent row (with slots for all current days)
@@ -1948,7 +1952,6 @@ document.getElementById('edc-tbody').addEventListener('click', function(e) {
   edcData.splice(+btn.dataset.delEdc, 1);
   renderEdcTable();
   recalcTab3();
-  autoSave();
 });
 
 function addEdcRow() {
@@ -2267,23 +2270,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 // ══════════════════════════════════════════════════
 // TAB 5 — EXTERNAL EDC · TRACER · FTV REPOS
 // ══════════════════════════════════════════════════
-
-let extEdcData = [
-  {agent:'External Agent 1', date:'01 Jun 2026', units:2, bank:'Wesbank',  note:''},
-  {agent:'External Agent 2', date:'02 Jun 2026', units:1, bank:'ABSA',     note:''},
-  {agent:'External Agent 3', date:'03 Jun 2026', units:3, bank:'Wesbank',  note:''},
-];
-
-let tracerData = [
-  {agent:'Tracer Agent A', date:'01 Jun 2026', units:1, bank:'STD Bank', note:''},
-  {agent:'Tracer Agent B', date:'02 Jun 2026', units:2, bank:'BMW FS',   note:''},
-  {agent:'Tracer Agent A', date:'03 Jun 2026', units:1, bank:'Wesbank',  note:''},
-];
-
-let ftvData = [
-  {agent:'FTV Agent 1', date:'01 Jun 2026', units:1, bank:'Wesbank',  note:''},
-  {agent:'FTV Agent 2', date:'02 Jun 2026', units:2, bank:'STD Bank', note:''},
-];
+// NOTE: extEdcData, tracerData, ftvData are declared at the top of the script
+// (with the other data stores) so that loadPersistedData() can restore them
+// before the render functions run. Do NOT redeclare them here.
 
 // ── Generic table renderer (shared pattern for all 3 tables)
 function renderT5Table(data, tbodyId, delAttr, unitColor) {
@@ -2327,16 +2316,17 @@ function makeT5ClickHandler(dataArr, renderFn) {
     if (!btn) return;
     const [, idxStr] = btn.dataset.del.split(':');
     dataArr.splice(+idxStr, 1);
-    renderFn(); recalcTab5(); autoSave();
+    renderFn(); recalcTab5();
   };
 }
 
 // Use live getters so handlers always reference the current arrays (even after loadPersistedData replaces them)
-document.getElementById('ext-edc-tbody').addEventListener('input',  e => { makeT5InputHandler(extEdcData)(e); autoSave(); });
+// IMPORTANT: arrow functions here re-read the globals each time, so array reassignment in applyAllData() is safe.
+document.getElementById('ext-edc-tbody').addEventListener('input',  e => makeT5InputHandler(extEdcData)(e));
 document.getElementById('ext-edc-tbody').addEventListener('click',  e => makeT5ClickHandler(extEdcData, renderExtEdcTable)(e));
-document.getElementById('tracer-tbody').addEventListener('input',   e => { makeT5InputHandler(tracerData)(e); autoSave(); });
+document.getElementById('tracer-tbody').addEventListener('input',   e => makeT5InputHandler(tracerData)(e));
 document.getElementById('tracer-tbody').addEventListener('click',   e => makeT5ClickHandler(tracerData, renderTracerTable)(e));
-document.getElementById('ftv-tbody').addEventListener('input',      e => { makeT5InputHandler(ftvData)(e); autoSave(); });
+document.getElementById('ftv-tbody').addEventListener('input',      e => makeT5InputHandler(ftvData)(e));
 document.getElementById('ftv-tbody').addEventListener('click',      e => makeT5ClickHandler(ftvData, renderFtvTable)(e));
 
 function addT5Row(dataArr, renderFn, defaultName) {
