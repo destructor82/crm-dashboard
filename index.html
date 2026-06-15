@@ -1744,12 +1744,25 @@ function refreshDailyRowTotals() {
   });
 }
 
+function countRemainingWorkdays() {
+  // Count Mon–Fri remaining in the current month (from tomorrow onward)
+  const now   = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  let count = 0;
+  for (let d = new Date(today.getTime()); d <= lastDay; d.setDate(d.getDate() + 1)) {
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) count++;
+  }
+  return count;
+}
+
 function recalcAll() {
   const totals = calcDailyTotals();
   const units  = totals.total;
   const target = +document.getElementById('k-target').value || 200;
   const days   = dailyData.length || 1;
-  const dLeft  = 21 - days;
+  const dLeft  = countRemainingWorkdays();
   const remaining  = target - units;
   const dailyAvg   = (units / days).toFixed(2);
   const dailyReq   = dLeft > 0 ? (remaining / dLeft).toFixed(2) : '0.00';
@@ -1764,6 +1777,9 @@ function recalcAll() {
   document.getElementById('k-outstanding').textContent = Math.max(0, remaining);
   document.getElementById('k-daily-req').textContent  = dailyReq;
   document.getElementById('k-peak').textContent       = peakDay;
+  // Update hint to show working days left
+  const hintEl = document.querySelector('#k-daily-req') && document.querySelector('#k-daily-req').closest('.kpi') && document.querySelector('#k-daily-req').closest('.kpi').querySelector('.kpi-hint');
+  if (hintEl) hintEl.textContent = 'Units/day needed (' + dLeft + ' work days left)';
 
   updateDailyFooter(totals);
   refreshDailyRowTotals();
