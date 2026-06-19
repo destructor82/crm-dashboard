@@ -2889,8 +2889,8 @@ function updateT5Charts() {
       options:{
         plugins:{legend:{display:false}},
         scales:{
-          y:{beginAtZero:true,grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'rgba(255,255,255,0.35)',stepSize:1}},
-          x:{grid:{display:false},ticks:{color:'rgba(255,255,255,0.75)'}}
+          y:{beginAtZero:true,grid:{color:cGrid()},ticks:{color:cText(),stepSize:1}},
+          x:{grid:{display:false},ticks:{color:cTextStrong()}}
         }
       }
     });
