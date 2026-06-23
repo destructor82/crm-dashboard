@@ -15,8 +15,10 @@
 <meta name="application-name" content="CRM Recovery">
 <meta name="description" content="Editable Operations Dashboard — track repos, ANPR, EDC, and agent performance.">
 <!-- App icons -->
-<link rel="icon" type="image/svg+xml" href="icon-512.svg">
-<link rel="apple-touch-icon" href="icon-512.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <!-- ══ end PWA meta ══ -->
 
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -3009,7 +3011,7 @@ function updateT5Charts() {
 
 </script>
 
-<!-- ══ PWA: Service Worker + Install Prompt ══ -->
+<!-- ══ PWA: Service Worker + Install Prompt v2 ══ -->
 <style>
 #pwa-install-banner {
   position: fixed;
@@ -3104,7 +3106,7 @@ function updateT5Charts() {
 
 <div id="pwa-install-banner" role="dialog" aria-label="Install CRM Recovery App" aria-live="polite">
   <div class="pwa-icon">
-    <img src="icon-512.svg" alt="CRM Recovery icon" onerror="this.style.display='none'">
+    <img src="icon-192.png" alt="CRM Recovery icon" onerror="this.style.display='none'">
   </div>
   <div class="pwa-text">
     <div class="pwa-title">Install App</div>
@@ -3115,103 +3117,87 @@ function updateT5Charts() {
 </div>
 
 <script>
-(function() {
-  'use strict';
+// ── Capture beforeinstallprompt IMMEDIATELY (before any defer/load) ──
+// Chrome fires this very early; if we miss it the prompt never comes back.
+var _pwaDeferred = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _pwaDeferred = e;
+  _pwaShowBanner();
+});
 
-  // ── 1. Register service worker ──────────────────────────────────────────
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('./sw.js').catch(function(err) {
-        // SW registration failed silently — app still works
-        console.warn('SW registration failed:', err);
-      });
-    });
-  }
+window.addEventListener('appinstalled', function() {
+  _pwaDeferred = null;
+  _pwaHideBanner();
+});
 
-  // ── 2. Install prompt ───────────────────────────────────────────────────
-  let deferredPrompt = null;
-  const banner  = document.getElementById('pwa-install-banner');
-  const btnInst = document.getElementById('pwa-btn-install');
-  const btnDism = document.getElementById('pwa-btn-dismiss');
-  const DISMISS_KEY = 'crm-pwa-dismissed';
+var _pwaBannerShown = false;
 
-  function showBanner() {
-    if (!banner) return;
-    // Don't show if user already dismissed this session
-    if (sessionStorage.getItem(DISMISS_KEY)) return;
-    setTimeout(function() {
-      banner.classList.add('visible');
-    }, 1800); // slight delay — let the dashboard load first
-  }
+function _pwaShowBanner() {
+  if (_pwaBannerShown) return;
+  if (sessionStorage.getItem('crm-pwa-nodisplay')) return;
+  var banner = document.getElementById('pwa-install-banner');
+  if (!banner) return;
+  _pwaBannerShown = true;
+  // Small delay so the UI isn't immediately covered
+  setTimeout(function() { banner.classList.add('visible'); }, 1200);
+}
 
-  function hideBanner() {
-    if (!banner) return;
-    banner.classList.remove('visible');
-  }
+function _pwaHideBanner() {
+  _pwaBannerShown = false;
+  var banner = document.getElementById('pwa-install-banner');
+  if (banner) banner.classList.remove('visible');
+}
 
-  // Chrome / Edge / Samsung Internet: beforeinstallprompt
-  window.addEventListener('beforeinstallprompt', function(e) {
-    e.preventDefault();
-    deferredPrompt = e;
-    showBanner();
-  });
+document.addEventListener('DOMContentLoaded', function() {
+  var banner  = document.getElementById('pwa-install-banner');
+  var btnInst = document.getElementById('pwa-btn-install');
+  var btnDism = document.getElementById('pwa-btn-dismiss');
 
-  // Install button clicked
+  // ── Install button ──
   if (btnInst) {
     btnInst.addEventListener('click', function() {
-      hideBanner();
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function(result) {
-          deferredPrompt = null;
-        });
+      _pwaHideBanner();
+      if (_pwaDeferred) {
+        _pwaDeferred.prompt();
+        _pwaDeferred.userChoice.then(function() { _pwaDeferred = null; });
       }
     });
   }
 
-  // Dismiss button
+  // ── Dismiss button ──
   if (btnDism) {
     btnDism.addEventListener('click', function() {
-      hideBanner();
-      sessionStorage.setItem(DISMISS_KEY, '1');
+      _pwaHideBanner();
+      sessionStorage.setItem('crm-pwa-nodisplay', '1');
     });
   }
 
-  // App installed — hide banner
-  window.addEventListener('appinstalled', function() {
-    hideBanner();
-    deferredPrompt = null;
-  });
+  // ── iOS Safari: no beforeinstallprompt — show manual instructions ──
+  var ua = navigator.userAgent || '';
+  var isIOS = /iphone|ipad|ipod/i.test(ua);
+  var isStandalone = window.navigator.standalone === true;
+  var isSafari = /safari/i.test(ua) && !/chrome|crios|fxios|android/i.test(ua);
+  if (isIOS && isSafari && !isStandalone && !sessionStorage.getItem('crm-pwa-nodisplay')) {
+    if (btnInst) { btnInst.textContent = 'HOW TO INSTALL'; btnInst.style.fontSize = '9px'; }
+    var sub = banner && banner.querySelector('.pwa-sub');
+    if (sub) sub.textContent = 'Tap Share ↑ then "Add to Home Screen"';
+    if (btnInst) btnInst.onclick = function() {
+      _pwaHideBanner();
+      sessionStorage.setItem('crm-pwa-nodisplay', '1');
+    };
+    setTimeout(function() {
+      if (banner) banner.classList.add('visible');
+    }, 1200);
+  }
 
-  // ── iOS Safari: doesn't fire beforeinstallprompt — show manual tip ──
-  (function checkIOS() {
-    const ua = navigator.userAgent;
-    const isIOS = /iphone|ipad|ipod/i.test(ua);
-    const isStandalone = window.navigator.standalone === true;
-    const isSafari = /safari/i.test(ua) && !/chrome|crios|fxios/i.test(ua);
-    if (isIOS && isSafari && !isStandalone) {
-      if (sessionStorage.getItem(DISMISS_KEY)) return;
-      // Swap install button text to show Share-sheet instruction for iOS
-      setTimeout(function() {
-        if (btnInst) {
-          btnInst.textContent = '+ HOME SCREEN';
-          btnInst.style.fontSize = '9px';
-        }
-        var subEl = banner ? banner.querySelector('.pwa-sub') : null;
-        if (subEl) subEl.textContent = 'Tap Share → "Add to Home Screen"';
-        showBanner();
-        // On iOS the button just re-shows the tip then dismisses
-        if (btnInst) {
-          btnInst.onclick = function() {
-            hideBanner();
-            sessionStorage.setItem(DISMISS_KEY, '1');
-          };
-        }
-      }, 100);
-    }
-  })();
-
-})();
+  // ── Register service worker ──
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(function(reg) { console.log('[PWA] SW registered', reg.scope); })
+      .catch(function(err) { console.warn('[PWA] SW failed:', err); });
+  }
+});
 </script>
 <!-- ══ end PWA ══ -->
 

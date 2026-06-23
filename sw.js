@@ -1,60 +1,36 @@
-// CRM Recovery Unit — Service Worker
-// Caches the app shell so it works offline and enables PWA install prompt
+// CRM Recovery Unit — Service Worker v2
+const CACHE = 'crm-v2';
+const PRECACHE = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
-const CACHE_NAME = 'crm-recovery-v1';
-const SHELL_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-512.svg',
-];
-
-// ── Install: pre-cache shell
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(SHELL_ASSETS).catch(() => {
-        // Non-fatal: external CDN assets may be blocked
-      });
-    })
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(PRECACHE).catch(() => {}))
   );
   self.skipWaiting();
 });
 
-// ── Activate: clean old caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
+self.addEventListener('activate', e => {
+  e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
-// ── Fetch: network-first with cache fallback
-self.addEventListener('fetch', event => {
-  // Only handle GET requests for same-origin + CDN assets
-  if (event.request.method !== 'GET') return;
-
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Cache successful responses
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    fetch(e.request)
+      .then(r => {
+        if (r && r.status === 200) {
+          const clone = r.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
         }
-        return response;
+        return r;
       })
-      .catch(() => {
-        // Offline fallback
-        return caches.match(event.request).then(cached => {
-          if (cached) return cached;
-          // If the main doc is requested, serve cached index
-          if (event.request.destination === 'document') {
-            return caches.match('./index.html');
-          }
-        });
-      })
+      .catch(() => caches.match(e.request)
+        .then(cached => cached || caches.match('./index.html'))
+      )
   );
 });
