@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Deep black background gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#1a0003"/>
+      <stop offset="100%" stop-color="#040404"/>
+    </radialGradient>
+
+    <!-- Liquid glass surface gradient -->
+    <linearGradient id="glassTop" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.22)"/>
+      <stop offset="30%"  stop-color="rgba(255,255,255,0.07)"/>
+      <stop offset="70%"  stop-color="rgba(232,0,28,0.08)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.03)"/>
+    </linearGradient>
+
+    <!-- Red glow core -->
+    <radialGradient id="redGlow" cx="50%" cy="55%" r="50%">
+      <stop offset="0%"   stop-color="rgba(232,0,28,0.55)"/>
+      <stop offset="60%"  stop-color="rgba(232,0,28,0.18)"/>
+      <stop offset="100%" stop-color="rgba(232,0,28,0)"/>
+    </radialGradient>
+
+    <!-- Inner shimmer highlight -->
+    <linearGradient id="shimmer" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.35)"/>
+      <stop offset="50%"  stop-color="rgba(255,255,255,0)"/>
+      <stop offset="100%" stop-color="rgba(255,100,120,0.15)"/>
+    </linearGradient>
+
+    <!-- Icon glass plate gradient -->
+    <linearGradient id="plateGrad" x1="15%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.14)"/>
+      <stop offset="45%"  stop-color="rgba(255,255,255,0.04)"/>
+      <stop offset="100%" stop-color="rgba(232,0,28,0.10)"/>
+    </linearGradient>
+
+    <!-- Red liquid accent gradient -->
+    <linearGradient id="redAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#ff1a35"/>
+      <stop offset="100%" stop-color="#c80018"/>
+    </linearGradient>
+
+    <!-- Droplet shimmer for "liquid" letters -->
+    <linearGradient id="letterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#ffffff"/>
+      <stop offset="40%"  stop-color="#ffb0bb"/>
+      <stop offset="100%" stop-color="#e8001c"/>
+    </linearGradient>
+
+    <!-- Blur filter for glass depth -->
+    <filter id="glassBlur" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Glow filter for red elements -->
+    <filter id="redGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Soft drop shadow -->
+    <filter id="softShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="rgba(0,0,0,0.7)"/>
+    </filter>
+
+    <!-- Clip rounded square -->
+    <clipPath id="roundedSquare">
+      <rect x="24" y="24" width="464" height="464" rx="108" ry="108"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── BACKGROUND ── -->
+  <rect x="24" y="24" width="464" height="464" rx="108" ry="108" fill="url(#bgGrad)" filter="url(#softShadow)"/>
+
+  <!-- Red atmospheric glow behind content -->
+  <ellipse cx="256" cy="290" rx="200" ry="160" fill="url(#redGlow)" clip-path="url(#roundedSquare)"/>
+
+  <!-- ── GLASS PLATE (main surface) ── -->
+  <rect x="24" y="24" width="464" height="464" rx="108" ry="108"
+        fill="url(#plateGrad)"
+        stroke="rgba(255,255,255,0.13)"
+        stroke-width="1.5"/>
+
+  <!-- Inner glass highlight band (top-left liquid sheen) -->
+  <path d="M80 24 Q24 24 24 80 L24 200 Q140 160 260 100 Q310 70 344 24 Z"
+        fill="url(#shimmer)" clip-path="url(#roundedSquare)" opacity="0.7"/>
+
+  <!-- ── CONTENT GROUP ── -->
+  <g clip-path="url(#roundedSquare)">
+
+    <!-- Subtle grid lines (liquid glass texture) -->
+    <g stroke="rgba(255,255,255,0.03)" stroke-width="1">
+      <line x1="24" y1="170" x2="488" y2="170"/>
+      <line x1="24" y1="255" x2="488" y2="255"/>
+      <line x1="24" y1="340" x2="488" y2="340"/>
+      <line x1="170" y1="24" x2="170" y2="488"/>
+      <line x1="340" y1="24" x2="340" y2="488"/>
+    </g>
+
+    <!-- ── RED RECOVERY BAR (liquid bar chart element) ── -->
+    <!-- Bar 1 -->
+    <rect x="88" y="320" width="52" height="98" rx="6"
+          fill="url(#redAccent)" opacity="0.85" filter="url(#redGlowFilter)"/>
+    <rect x="88" y="320" width="52" height="12" rx="6"
+          fill="rgba(255,255,255,0.35)"/>
+
+    <!-- Bar 2 (taller) -->
+    <rect x="156" y="272" width="52" height="146" rx="6"
+          fill="url(#redAccent)" opacity="0.9" filter="url(#redGlowFilter)"/>
+    <rect x="156" y="272" width="52" height="12" rx="6"
+          fill="rgba(255,255,255,0.35)"/>
+
+    <!-- Bar 3 (tallest) -->
+    <rect x="224" y="228" width="52" height="190" rx="6"
+          fill="url(#redAccent)" opacity="1" filter="url(#redGlowFilter)"/>
+    <rect x="224" y="228" width="52" height="14" rx="6"
+          fill="rgba(255,255,255,0.40)"/>
+
+    <!-- Bar 4 (medium) -->
+    <rect x="292" y="296" width="52" height="122" rx="6"
+          fill="url(#redAccent)" opacity="0.75" filter="url(#redGlowFilter)"/>
+    <rect x="292" y="296" width="52" height="12" rx="6"
+          fill="rgba(255,255,255,0.30)"/>
+
+    <!-- Bar 5 (low) -->
+    <rect x="360" y="348" width="52" height="70" rx="6"
+          fill="url(#redAccent)" opacity="0.60" filter="url(#redGlowFilter)"/>
+    <rect x="360" y="348" width="52" height="10" rx="6"
+          fill="rgba(255,255,255,0.25)"/>
+
+    <!-- Baseline -->
+    <line x1="72" y1="418" x2="440" y2="418"
+          stroke="rgba(232,0,28,0.55)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- ── "CRM" LETTERS ── -->
+    <text x="256" y="196"
+          font-family="'Arial Black', 'Arial', sans-serif"
+          font-weight="900"
+          font-size="78"
+          letter-spacing="4"
+          text-anchor="middle"
+          fill="url(#letterGrad)"
+          filter="url(#redGlowFilter)">CRM</text>
+
+    <!-- Thin red underline below CRM -->
+    <line x1="128" y1="206" x2="384" y2="206"
+          stroke="url(#redAccent)" stroke-width="2.5" stroke-linecap="round"
+          filter="url(#redGlowFilter)" opacity="0.8"/>
+
+    <!-- ── GLASS OVERLAY (top sheen layer) ── -->
+    <!-- Top specular highlight strip -->
+    <path d="M132 24 Q24 24 24 132 L24 168 Q80 148 180 108 Q270 72 380 24 Z"
+          fill="rgba(255,255,255,0.09)" clip-path="url(#roundedSquare)"/>
+
+    <!-- Bottom-right inner shadow for depth -->
+    <path d="M488 380 Q488 488 380 488 L200 488 Q300 440 400 360 Q450 318 488 260 Z"
+          fill="rgba(0,0,0,0.18)" clip-path="url(#roundedSquare)"/>
+
+    <!-- Liquid droplet highlight (top-left bubble) -->
+    <ellipse cx="110" cy="80" rx="38" ry="18"
+             fill="rgba(255,255,255,0.09)" transform="rotate(-25 110 80)"/>
+    <ellipse cx="102" cy="74" rx="18" ry="8"
+             fill="rgba(255,255,255,0.18)" transform="rotate(-25 102 74)"/>
+  </g>
+
+  <!-- ── OUTER BORDER GLOW ── -->
+  <rect x="24" y="24" width="464" height="464" rx="108" ry="108"
+        fill="none"
+        stroke="rgba(232,0,28,0.40)"
+        stroke-width="1"
+        filter="url(#redGlowFilter)"/>
+
+  <!-- Crisp inner border -->
+  <rect x="26" y="26" width="460" height="460" rx="107" ry="107"
+        fill="none"
+        stroke="rgba(255,255,255,0.11)"
+        stroke-width="1"/>
+</svg>
